@@ -4,11 +4,14 @@
 #include <string>
 #include <chrono>
 #include <algorithm>
+#include <nlohmann/json.hpp>
+#include <iostream>
 
 // for the stretch goal of allowing a user to manually control an individual UAV
 enum class UAVControleMode {
 	AUTONOMOUS,
-	MANUAL
+	MANUAL,
+	// perhaps LEADER
 };
 
 class UAV {
@@ -58,38 +61,14 @@ public:
 	std::vector<NeighborInfo> get_neighbor_status() { return neighbor_status; }
 
 	// Updaters
-	void update_position(double dt) {
-		pos[0] += vel[0] * dt;
-		pos[1] += vel[1] * dt;
-		pos[2] += vel[2] * dt; 
-	};
+	void update_position(double dt);
 	void add_neighbor_address(const std::string& address) { neighbor_address.push_back(address); }
-	void remove_neighbor_address(const std::string& address) {
-		auto addr_id = std::find(neighbor_address.begin(), neighbor_address.end(), address);
-		if (addr_id != neighbor_address.end()) { neighbor_address.erase(addr_id); }
-	};
-	void update_neighbor_status(int neighbor_id, const std::array<double, 3>& pos) {
-		auto now = std::chrono::steady_clock::now();
+	void remove_neighbor_address(const std::string& address);
+	void update_neighbor_status(int neighbor_id, const std::array<double, 3>& pos);
+	void remove_stale_neighbors(std::chrono::milliseconds max_age = std::chrono::milliseconds(1000));
+	std::vector<NeighborInfo> get_fresh_neighbors(std::chrono::milliseconds max_age = std::chrono::milliseconds(500));
 
-		for (auto& neighbor : neighbor_status) {
-			if (neighbor.id == neighbor_id) {
-				neighbor.last_known_pos = pos;
-				neighbor.last_time = now;
-				return;
-			}
-		}
-		neighbor_status.push_back({neighbor_id, pos, now});
-	}
-	void remove_stale_neighbors(std::chrono::milliseconds max_age = std::chrono::milliseconds(1000)) {
-		auto now = std::chrono::steady_clock::now();
-
-		neighbor_status.erase(
-			std::remove_if(neighbor_status.begin(), neighbor_status.end(),
-			[now, max_age](const NeighborInfo& neighbor) {
-				return (now - neighbor.last_time) > max_age;
-			}),
-			neighbor_status.end()
-		);
-	}
-	std::vector<NeighborInfo>
+	// JSON
+	void uav_telemetry_broadcast();
+	void uav_to_telemetry_server();
 };
