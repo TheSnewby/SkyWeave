@@ -30,6 +30,64 @@ export default function TelemetryPage() {
     send({ type: "swarm_settings", payload: swarmSettings });
   }, [swarmSettings, send]);
 
+  // Keyboard controls: WASD to move leader, Q/E altitude, T toggle trails
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Don’t hijack typing in inputs/textareas/selects
+      const target = event.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) {
+        return;
+      }
+
+      switch (event.key.toLowerCase()) {
+        case "w":
+          send({
+            type: "command",
+            payload: { type: "move_leader", direction: "north" },
+          });
+          break;
+        case "s":
+          send({
+            type: "command",
+            payload: { type: "move_leader", direction: "south" },
+          });
+          break;
+        case "a":
+          send({
+            type: "command",
+            payload: { type: "move_leader", direction: "west" },
+          });
+          break;
+        case "d":
+          send({
+            type: "command",
+            payload: { type: "move_leader", direction: "east" },
+          });
+          break;
+        case "q":
+          send({
+            type: "command",
+            payload: { type: "altitude_change", amount: 10 },
+          });
+          break;
+        case "e":
+          send({
+            type: "command",
+            payload: { type: "altitude_change", amount: -10 },
+          });
+          break;
+        case "t":
+          setShowTrails((prev) => !prev);
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [send]);
+
   return (
     <main className="min-h-screen w-full bg-black text-white flex justify-center items-start py-8">
       <div className="w-full max-w-6xl px-4 crt-scanlines">
@@ -40,6 +98,9 @@ export default function TelemetryPage() {
             </h1>
             <p className="text-zinc-400 mt-1 text-sm">
               Live UAV swarm telemetry • C++ sim → Rust server → WebSocket → Next.js
+            </p>
+            <p className="text-zinc-500 mt-1 text-xs nasa-text">
+              Controls: WASD move leader • Q/E altitude • T toggle trails
             </p>
           </div>
 
