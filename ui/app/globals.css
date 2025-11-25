@@ -2,15 +2,15 @@
 @import "tailwindcss";
 
 :root {
-  /* Tailwind expects background/foreground tokens */
+  /* tailwind expects background/foreground tokens */
   --background: #0a0a0a;          /* default dark mode look for Mission Control */
   --foreground: #ededed;
 
-  /* Maintain compatibility with prior variable usage */
+  /* maintain compatibility with prior variable usage */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Default fonts (these will be overridden where needed) */
+  /* default fonts (these will be overridden where needed) */
   --font-sans: var(--font-geist-sans, Arial, Helvetica, sans-serif);
   --font-mono: var(--font-geist-mono, monospace);
 }
@@ -35,7 +35,7 @@ body {
   text-shadow: 0 0 6px #00ff88;
 }
 
-/* Slight animated CRT flicker */
+/* slight animated CRT flicker */
 .crt-flicker {
   animation: crt-flicker 2.4s infinite;
 }
@@ -51,7 +51,7 @@ body {
   100% { opacity: 0.97; }
 }
 
-/* Optional CRT scanline overlay */
+/* CRT scanline overlay effect */
 .crt-scanlines {
   position: relative;
 }
@@ -67,7 +67,7 @@ body {
   mix-blend-mode: soft-light;
 }
 
-/* ===== SKYWEAVE Mission Control Panels & Buttons ===== */
+/* Mission Control panel and button styles */
 
 :root {
   --mc-panel-bg: #050814;
@@ -78,7 +78,7 @@ body {
   --mc-button-active-bg: #020617;
 }
 
-/* Raised console panels */
+/* raised console panels */
 .mc-panel {
   border-radius: 0.75rem;
   background-color: var(--mc-panel-bg);
@@ -90,7 +90,7 @@ body {
   padding: 1rem;
 }
 
-/* Optional inner layer for double-depth panels */
+/* optional inner layer for double-depth panels */
 .mc-panel-inner {
   border-radius: 0.75rem;
   border: 1px solid rgba(15, 23, 42, 0.9);
@@ -182,7 +182,7 @@ body {
   box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
 }
 
-/* ===== SKYWEAVE Background Vignette (Retro Monitor Glow) ===== */
+/* background gradient for body */
 
 body {
   background: radial-gradient(
@@ -195,7 +195,7 @@ body {
   background-attachment: fixed;
 }
 
-/* ===== WebSocket Status Indicator ===== */
+/* websocket status dots */
 
 .ws-dot {
   display: inline-block;
@@ -219,7 +219,7 @@ body {
   box-shadow: 0 0 6px #ef4444;
 }
 
-/* ===== SKYWEAVE Button Hover Glow ===== */
+/* button glow effect */
 
 .btn-glow {
   transition:

@@ -74,62 +74,91 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
     async move {
         let (mut sender, mut receiver) = socket.split();
 
-        // task to handle messages coming from the UI (commands, settings)
-        let shared_inbound = shared.clone();
-        tokio::spawn(async move {
-            while let Some(Ok(msg)) = receiver.next().await {
-                match msg {
-                    Message::Text(text) => {
-                        match serde_json::from_str::<ClientMessage>(&text) {
-                            Ok(ClientMessage::Command(cmd)) => {
-                                shared_inbound.swarm.apply_command(cmd).await;
-                            }
-                            Ok(ClientMessage::SwarmSettings(settings)) => {
-                                shared_inbound.swarm.apply_settings(settings).await;
-                            }
-                            Err(err) => {
-                                tracing::warn!("Invalid WS client message: {}", err);
-                            }
-                        }
-                    }
-                    Message::Close(_) => {
-                        tracing::info!("WebSocket client closed connection");
-                        break;
-                    }
-                    _ => {
-                        // ignore non-text messages for now
-                    }
-                }
-            }
-        });
+        // subscribe to telemetry updates
+        let mut rx = shared.tx.subscribe();
 
         // send a snapshot of all UAVs on connect
         if let Ok(initial) = serde_json::to_string(&shared.swarm.list_uavs().await) {
             let _ = sender.send(Message::Text(initial)).await;
         }
 
-        // subscribe to telemetry updates
-        let mut rx = shared.tx.subscribe();
-
         loop {
-            match rx.recv().await {
-                Ok(update) => {
-                    let msg = match serde_json::to_string(&update) {
-                        Ok(m) => m,
-                        Err(err) => {
-                            tracing::warn!("Failed to serialize update: {}", err);
-                            continue;
-                        }
-                    };
+            tokio::select! {
+                maybe_msg = receiver.next() => {
+                    match maybe_msg {
+                        Some(Ok(msg)) => {
+                            match msg {
+                                Message::Text(text) => {
+                                    match serde_json::from_str::<ClientMessage>(&text) {
+                                        Ok(ClientMessage::Command(cmd)) => {
+                                            shared.swarm.apply_command(cmd).await;
+                                        }
+                                        Ok(ClientMessage::SwarmSettings(settings)) => {
+                                            // apply and then echo settings update back to this client
+                                            let settings_clone = settings.clone();
+                                            shared.swarm.apply_settings(settings).await;
 
-                    if sender.send(Message::Text(msg)).await.is_err() {
-                        tracing::info!("WebSocket client disconnected");
-                        break;
+                                            let payload = serde_json::json!({
+                                                "type": "settings_update",
+                                                "payload": {
+                                                    "cohesion": settings_clone.cohesion,
+                                                    "separation": settings_clone.separation,
+                                                    "alignment": settings_clone.alignment,
+                                                    "max_speed": settings_clone.max_speed,
+                                                    "target_altitude": settings_clone.target_altitude,
+                                                }
+                                            });
+
+                                            if let Ok(txt) = serde_json::to_string(&payload) {
+                                                let _ = sender.send(Message::Text(txt)).await;
+                                            }
+                                        }
+                                        Err(err) => {
+                                            tracing::warn!("Invalid WS client message: {}", err);
+                                        }
+                                    }
+                                }
+                                Message::Close(_) => {
+                                    tracing::info!("WebSocket client closed connection");
+                                    break;
+                                }
+                                _ => {
+                                    // ignore non-text messages for now
+                                }
+                            }
+                        }
+                        Some(Err(err)) => {
+                            tracing::warn!("WebSocket receive error: {}", err);
+                            break;
+                        }
+                        None => {
+                            tracing::info!("WebSocket client stream ended");
+                            break;
+                        }
                     }
                 }
-                Err(err) => {
-                    tracing::warn!("WebSocket broadcast recv error: {}", err);
-                    break;
+
+                recv_result = rx.recv() => {
+                    match recv_result {
+                        Ok(update) => {
+                            let msg = match serde_json::to_string(&update) {
+                                Ok(m) => m,
+                                Err(err) => {
+                                    tracing::warn!("Failed to serialize update: {}", err);
+                                    continue;
+                                }
+                            };
+
+                            if sender.send(Message::Text(msg)).await.is_err() {
+                                tracing::info!("WebSocket client disconnected");
+                                break;
+                            }
+                        }
+                        Err(err) => {
+                            tracing::warn!("WebSocket broadcast recv error: {}", err);
+                            break;
+                        }
+                    }
                 }
             }
         }

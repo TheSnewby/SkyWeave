@@ -14,29 +14,29 @@ type Props = {
  */
 export default function TelemetryTable({ uavs }: Props) {
   return (
-    <section className="mc-panel overflow-hidden">
-      <table className="w-full text-xs md:text-sm">
+    <section className="mc-panel mc-panel-inner overflow-hidden bg-gradient-to-b from-black/80 to-black/95 border border-emerald-700/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+      <table className="w-full text-xs md:text-sm font-sans">
         <thead className="bg-black/40">
           <tr>
-            <th className="px-4 py-2 border-b border-zinc-700 text-left nasa-text">
+            <th className="px-4 py-2 border-b border-emerald-700/60 text-left nasa-text text-emerald-300 tracking-widest uppercase">
               ID
             </th>
-            <th className="px-4 py-2 border-b border-zinc-700 text-left nasa-text">
+            <th className="px-4 py-2 border-b border-emerald-700/60 text-left nasa-text text-emerald-300 tracking-widest uppercase">
               Callsign
             </th>
-            <th className="px-4 py-2 border-b border-zinc-700 text-left nasa-text">
+            <th className="px-4 py-2 border-b border-emerald-700/60 text-left nasa-text text-emerald-300 tracking-widest uppercase">
               X
             </th>
-            <th className="px-4 py-2 border-b border-zinc-700 text-left nasa-text">
+            <th className="px-4 py-2 border-b border-emerald-700/60 text-left nasa-text text-emerald-300 tracking-widest uppercase">
               Y
             </th>
-            <th className="px-4 py-2 border-b border-zinc-700 text-left nasa-text">
+            <th className="px-4 py-2 border-b border-emerald-700/60 text-left nasa-text text-emerald-300 tracking-widest uppercase">
               Z
             </th>
-            <th className="px-4 py-2 border-b border-zinc-700 text-left nasa-text">
+            <th className="px-4 py-2 border-b border-emerald-700/60 text-left nasa-text text-emerald-300 tracking-widest uppercase">
               Speed (m/s)
             </th>
-            <th className="px-4 py-2 border-b border-zinc-700 text-left nasa-text">
+            <th className="px-4 py-2 border-b border-emerald-700/60 text-left nasa-text text-emerald-300 tracking-widest uppercase">
               Last Update
             </th>
           </tr>
@@ -45,33 +45,33 @@ export default function TelemetryTable({ uavs }: Props) {
           {uavs.length === 0 ? (
             <tr>
               <td
-                className="px-4 py-4 text-center nasa-text"
+                className="px-4 py-6 text-center nasa-text text-emerald-300 tracking-widest uppercase"
                 colSpan={7}
               >
-                No telemetry yet…
+                NO TELEMETRY // STANDBY
               </td>
             </tr>
           ) : (
             uavs.map((uav) => (
               <tr
                 key={uav.id}
-                className="border-b border-zinc-800/50 last:border-b-0"
+                className="border-b border-emerald-900/40 last:border-b-0 hover:bg-emerald-900/10"
               >
-                <td className="px-4 py-2 nasa-text">{uav.id}</td>
-                <td className="px-4 py-2 nasa-text">{uav.callsign}</td>
-                <td className="px-4 py-2 nasa-text">
+                <td className="px-4 py-2 nasa-text text-emerald-100">{uav.id}</td>
+                <td className="px-4 py-2 nasa-text text-emerald-100">{uav.callsign}</td>
+                <td className="px-4 py-2 nasa-text text-emerald-100">
                   {uav.position.x.toFixed(1)}
                 </td>
-                <td className="px-4 py-2 nasa-text">
+                <td className="px-4 py-2 nasa-text text-emerald-100">
                   {uav.position.y.toFixed(1)}
                 </td>
-                <td className="px-4 py-2 nasa-text">
+                <td className="px-4 py-2 nasa-text text-emerald-100">
                   {uav.position.z.toFixed(1)}
                 </td>
-                <td className="px-4 py-2 nasa-text">
+                <td className="px-4 py-2 nasa-text text-emerald-100">
                   {uav.velocity_mps.toFixed(1)}
                 </td>
-                <td className="px-4 py-2 nasa-text">
+                <td className="px-4 py-2 nasa-text text-emerald-100">
                   {uav.last_update
                     ? new Date(uav.last_update).toLocaleTimeString()
                     : "—"}

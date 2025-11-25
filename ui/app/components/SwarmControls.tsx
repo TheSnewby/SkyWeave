@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React from "react";
@@ -31,12 +29,12 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
   };
 
   return (
-    <section className="mc-panel nasa-text text-xs">
-      <h2 className="mb-3 uppercase tracking-wide text-[0.7rem] text-zinc-400">
+    <section className="mc-panel mc-panel-inner bg-gradient-to-b from-black/80 to-black/95 nasa-text text-xs border border-emerald-700/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+      <h2 className="mb-4 uppercase tracking-widest text-[0.7rem] text-emerald-300">
         Swarm Behavior Controls
       </h2>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* cohesion */}
         <ControlRow
           label="COHESION"
@@ -103,11 +101,13 @@ type ControlRowProps = {
 };
 
 function ControlRow({ label, min, max, step, value, onChange }: ControlRowProps) {
+  const formatted = step >= 1 ? value.toFixed(0) : value.toFixed(2);
+
   return (
     <div>
       <div className="flex justify-between mb-1">
-        <span className="text-[0.7rem] tracking-wide">{label}</span>
-        <span className="text-[0.7rem]">{value.toFixed(2)}</span>
+        <span className="text-[0.7rem] tracking-wide text-emerald-200">{label}</span>
+        <span className="text-[0.7rem] text-emerald-300">{formatted}</span>
       </div>
       <input
         type="range"
@@ -116,7 +116,7 @@ function ControlRow({ label, min, max, step, value, onChange }: ControlRowProps)
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="mc-slider accent-emerald-400 cursor-pointer"
+        className="mc-slider accent-emerald-400 cursor-pointer hover:brightness-110"
       />
     </div>
   );
