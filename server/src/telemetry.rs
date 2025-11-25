@@ -57,15 +57,25 @@ pub struct SwarmSettings {
 }
 
 /// state of UAV swarm
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct SwarmState {
     inner: Arc<RwLock<HashMap<Uuid, UavState>>>,
+    settings: Arc<RwLock<SwarmSettings>>,
+    last_command: Arc<RwLock<Option<serde_json::Value>>>,
 }
 
 impl SwarmState {
     pub fn new() -> Self {
         SwarmState {
             inner: Arc::new(RwLock::new(HashMap::new())),
+            settings: Arc::new(RwLock::new(SwarmSettings {
+                cohesion: 1.0,
+                separation: 1.0,
+                alignment: 1.0,
+                max_speed: 10.0,
+                target_altitude: 10.0,
+            })),
+            last_command: Arc::new(RwLock::new(None)),
         }
     }
 
@@ -84,21 +94,43 @@ impl SwarmState {
         map.values().cloned().collect()
     }
 
-    /// command from UI to control swarm behavior - TO BE IMPLEMENTED
+    /// command from UI to control swarm behavior
     pub async fn apply_command(&self, cmd: serde_json::Value) {
-        tracing::info!("swarm_command_from_ui" = %cmd);
+        {
+            let mut last = self.last_command.write().await;
+            *last = Some(cmd.clone());
+        }
+
+        tracing::info!(swarm_command_from_ui = %cmd);
     }
 
-    /// apply swarm behavior settings from UI - TO BE IMPLEMENTED
+    /// apply swarm behavior settings from UI
     pub async fn apply_settings(&self, settings: SwarmSettings) {
+        {
+            let mut current = self.settings.write().await;
+            *current = settings.clone();
+        }
+
         tracing::info!(
             cohesion = settings.cohesion,
             separation = settings.separation,
             alignment = settings.alignment,
             max_speed = settings.max_speed,
             target_altitude = settings.target_altitude,
-            "updated_swarm_settings_from_ui",
+            updated_swarm_settings_from_ui = true,
         );
+    }
+
+    /// get the current swarm settings snapshot
+    pub async fn current_settings(&self) -> SwarmSettings {
+        let s = self.settings.read().await;
+        s.clone()
+    }
+
+    /// get the last command received from the UI, if any
+    pub async fn last_command(&self) -> Option<serde_json::Value> {
+        let c = self.last_command.read().await;
+        c.clone()
     }
 }
 
