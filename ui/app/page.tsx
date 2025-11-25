@@ -10,7 +10,7 @@ import SwarmControls, { SwarmSettings } from "./components/SwarmControls";
 import CommandPanel, { Command } from "./components/CommandPanel";
 
 export default function TelemetryPage() {
-  const { uavs, status, send } = useTelemetry();
+  const { uavs, status, settings, send } = useTelemetry();
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(true);
   const [showTrails, setShowTrails] = useState(true);
@@ -21,6 +21,20 @@ export default function TelemetryPage() {
     maxSpeed: 30,
     targetAltitude: 150,
   });
+
+  // sync local swarmSettings when server-sourced settings arrive over WebSocket
+  useEffect(() => {
+    if (!settings) return;
+
+    setSwarmSettings((prev) => ({
+      cohesion: settings.cohesion ?? prev.cohesion,
+      separation: settings.separation ?? prev.separation,
+      alignment: settings.alignment ?? prev.alignment,
+      maxSpeed: settings.max_speed ?? settings.maxSpeed ?? prev.maxSpeed,
+      targetAltitude:
+        settings.target_altitude ?? settings.targetAltitude ?? prev.targetAltitude,
+    }));
+  }, [settings]);
 
   const handleCommand = (cmd: Command) => {
     // Send command over the telemetry WebSocket to the Rust backend
@@ -154,21 +168,40 @@ export default function TelemetryPage() {
             </p>
           </div>
 
-          <div className="text-right text-xs nasa-text mc-panel-inner bg-black/40 rounded-lg px-3 py-2">
-            <div className="flex items-center gap-2 crt-flicker">
-              <span
-                className={
-                  "ws-dot " +
-                  (status.toString().toLowerCase() === "connected"
-                    ? "ws-dot--ok"
-                    : status.toString().toLowerCase() === "connecting"
-                    ? "ws-dot--warn"
-                    : "ws-dot--err")
-                }
-              />
-              WS: {status.toUpperCase()}
+          {/* NEW RETURN BUTTON */}
+          <div className="flex flex-col items-end">
+            <button
+              className="mc-button nasa-text text-[0.65rem] mb-2 mr-1 btn-glow"
+              onClick={() => setShowSplash(true)}
+            >
+              ← Return
+            </button>
+
+            <div className="text-right text-xs nasa-text mc-panel-inner bg-black/40 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 crt-flicker">
+                <span
+                  className={
+                    "ws-dot " +
+                    (status === "open"
+                      ? "ws-dot--ok"
+                      : status === "connecting"
+                      ? "ws-dot--warn"
+                      : "ws-dot--err")
+                  }
+                />
+                <span>
+                  WS:{" "}
+                  {status === "open"
+                    ? "CONNECTED"
+                    : status === "connecting"
+                    ? "CONNECTING..."
+                    : status === "closed"
+                    ? "DISCONNECTED"
+                    : "ERROR"}
+                </span>
+              </div>
+              <div className="mt-1">UAVS: {uavs.length}</div>
             </div>
-            <div className="mt-1">UAVS: {uavs.length}</div>
           </div>
         </header>
 
@@ -191,7 +224,7 @@ export default function TelemetryPage() {
         </section>
 
         <section className="mb-6 grid gap-4 md:grid-cols-2">
-          <CommandPanel onCommand={handleCommand} />
+          <CommandPanel onCommand={handleCommand} status={status} />
           <SwarmControls settings={swarmSettings} onChange={setSwarmSettings} />
         </section>
 

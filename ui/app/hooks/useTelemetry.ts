@@ -23,7 +23,7 @@ export type UavState = {
 	last_update?: string;
 };
 
-type ConnectionStatus = "connecting" | "open" | "closed" | "error";
+export type ConnectionStatus = "connecting" | "open" | "closed" | "error";
 
 type TelemetryState = {
 	uavs: UavState[];

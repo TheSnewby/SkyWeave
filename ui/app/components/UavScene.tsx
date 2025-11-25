@@ -37,21 +37,28 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
   const formation = "N/A"; // placeholder for future formation modes
 
   return (
-    <div className="w-full h-96 mc-panel overflow-hidden relative">
+    <div className="w-full h-96 mc-panel mc-panel-inner overflow-hidden relative bg-gradient-to-b from-black/80 to-black/95 border border-emerald-700/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+      {!leader && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+          <div className="mc-panel-inner nasa-text text-xs tracking-widest text-emerald-300 bg-black/60 px-4 py-2 rounded">
+            NO TELEMETRY // STANDBY
+          </div>
+        </div>
+      )}
       {leader && (
         <div className="absolute top-3 left-3 z-10 mc-panel-inner nasa-text text-[0.65rem] bg-black/40 rounded-lg">
           <div className="flex flex-col gap-1">
             <div className="flex gap-4">
               <div>
-                <div className="uppercase tracking-wide text-[0.6rem] text-zinc-400">Leader</div>
+                <div className="uppercase tracking-wide text-[0.6rem] text-emerald-300">Leader</div>
                 <div className="text-[0.75rem]">{leader.callsign}</div>
               </div>
               <div>
-                <div className="uppercase tracking-wide text-[0.6rem] text-zinc-400">UAVs</div>
+                <div className="uppercase tracking-wide text-[0.6rem] text-emerald-300">UAVs</div>
                 <div className="text-[0.75rem]">{uavCount}</div>
               </div>
               <div>
-                <div className="uppercase tracking-wide text-[0.6rem] text-zinc-400">Heading</div>
+                <div className="uppercase tracking-wide text-[0.6rem] text-emerald-300">Heading</div>
                 <div className="text-[0.75rem]">
                   {headingDeg !== null ? `${headingDeg.toFixed(0)}°` : "—"}
                 </div>
@@ -59,19 +66,19 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
             </div>
             <div className="flex gap-4">
               <div>
-                <div className="uppercase tracking-wide text-[0.6rem] text-zinc-400">Speed</div>
+                <div className="uppercase tracking-wide text-[0.6rem] text-emerald-300">Speed</div>
                 <div className="text-[0.75rem]">
                   {speed !== null ? `${speed.toFixed(1)} m/s` : "—"}
                 </div>
               </div>
               <div>
-                <div className="uppercase tracking-wide text-[0.6rem] text-zinc-400">Altitude</div>
+                <div className="uppercase tracking-wide text-[0.6rem] text-emerald-300">Altitude</div>
                 <div className="text-[0.75rem]">
                   {altitude !== null ? `${altitude.toFixed(1)} m` : "—"}
                 </div>
               </div>
               <div>
-                <div className="uppercase tracking-wide text-[0.6rem] text-zinc-400">Formation</div>
+                <div className="uppercase tracking-wide text-[0.6rem] text-emerald-300">Formation</div>
                 <div className="text-[0.75rem]">{formation}</div>
               </div>
             </div>
@@ -183,7 +190,7 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
                 center
                 distanceFactor={12}
               >
-                <div className="nasa-text text-[0.6rem] bg-black/40 px-2 py-1 rounded mc-panel-inner">
+                <div className="nasa-text text-[0.6rem] text-emerald-200 bg-black/40 px-2 py-1 rounded mc-panel-inner">
                   {uav.callsign}
                 </div>
               </Html>
