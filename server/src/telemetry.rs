@@ -210,7 +210,7 @@ fn decode_frame(data: &[u8]) -> Result<UavState, serde_json::Error> {
     let frame: TelemetryFrame = serde_json::from_slice(data)?;
     Ok(UavState {
         id: frame.id,
-        callsign: frame.callsign,
+		x: frame.
         position: frame.position,
         orientation: frame.orientation,
         velocity_mps: frame.velocity_mps,
