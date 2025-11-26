@@ -76,12 +76,8 @@ void UAV::uav_to_telemetry_server(int port = 6000) {
 	auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
 	nlohmann::json j = {
 		{"id", get_id()},
-		{"x", get_x()},
-		{"y", get_y()},
-		{"z", get_z()},
-		{"vx", get_velx()},
-		{"vy", get_vely()},
-		{"vz", get_velz()},
+		{"position", get_pos()},
+		{"velocity", get_vel()},
 		{"timestamp", timestamp}
 	};
 	json_str = j.dump();
