@@ -23,3 +23,11 @@ primary_region = 'dfw'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+
+[[services]]
+  protocol = "udp"
+  internal_port = 6000
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 6000
