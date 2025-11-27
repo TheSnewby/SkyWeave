@@ -225,12 +225,6 @@ export default function TelemetryPage() {
           <TelemetryTable uavs={uavs} />
         </section>
 
-        <section className="mt-4">
-          <h2 className="text-sm nasa-text mb-2">Swarm Telemetry (debug)</h2>
-          <pre className="text-[0.6rem] bg-black/60 rounded-lg p-3 overflow-x-auto max-h-64">
-            {JSON.stringify(uavs, null, 2)}
-          </pre>
-        </section>
       </div>
     </main>
   );
