@@ -59,7 +59,7 @@ void UAV::uav_telemetry_broadcast() {
 	std::string timestamp = oss.str();
 
 	nlohmann::json j = {
-	    { "id", get_id() },
+	    { "id", (uint64_t)get_id() },
 	    { "position", {
 	        { "x", pos[0] },
 	        { "y", pos[1] },

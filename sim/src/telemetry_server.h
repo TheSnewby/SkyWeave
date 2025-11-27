@@ -97,4 +97,5 @@ private:
 	void sender_loop();
 	void process_telemetry(const char *json_str, const struct sockaddr_in& client);
 	std::string convert_json_pkg_to_string_of_array();
+	void send_individual_frames_to_rust();
 };
