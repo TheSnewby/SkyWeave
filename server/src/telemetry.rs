@@ -17,31 +17,28 @@ pub struct Position {
 }
 /// orientation in radians
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Orientation {
-    pub roll: f64,
-    pub pitch: f64,
-    pub yaw: f64,
+pub struct Velocity {
+    pub vx: f64,
+	pub vy: f64,
+    pub vz: f64,
 }
 
 /// state of a single UAV sent to WebSocket clients
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UavState {
     pub id: Uuid,
-    pub callsign: String,
     pub position: Position,
-    pub orientation: Orientation,
-    pub velocity_mps: f64,
-    pub last_update: DateTime<Utc>,
+    pub velocity: Velocity,
+    pub timestamp: DateTime<Utc>,
 }
 
 /// Telemetry sent over UDP as JSON from telemetry_encoder.cpp
 #[derive(Debug, Clone, Deserialize)]
 pub struct TelemetryFrame {
     pub id: Uuid,
-    pub callsign: String,
     pub position: Position,
-    pub orientation: Orientation,
-    pub velocity_mps: f64,
+    pub velocity: Velocity,
+	pub timestamp: DateTime<Utc>,
 }
 
 /// Swarm Behavior settings sent from the UI over WebSocket
@@ -210,10 +207,8 @@ fn decode_frame(data: &[u8]) -> Result<UavState, serde_json::Error> {
     let frame: TelemetryFrame = serde_json::from_slice(data)?;
     Ok(UavState {
         id: frame.id,
-        callsign: frame.callsign,
         position: frame.position,
-        orientation: frame.orientation,
-        velocity_mps: frame.velocity_mps,
-        last_update: Utc::now(),
+        velocity: frame.velocity,
+        timestamp: frame.timestamp,
     })
 }
