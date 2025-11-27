@@ -116,7 +116,7 @@ export default function TelemetryPage() {
               </g>
             </svg>
           </div>
-          <h1 className="text-2xl md:text-3xl font-semibold nasa-text mb-2 mx-auto pl-2">
+          <h1 className="text-4xl md:text-5xl font-semibold nasa-text mb-2 mx-auto pl-2">
             SkyWeave
           </h1>
           <p className="text-zinc-400 text-sm md:text-base mb-6">Control autonomous UAV swarms with real-time telemetry and commands.</p>
