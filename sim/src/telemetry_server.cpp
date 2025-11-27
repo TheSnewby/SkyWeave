@@ -63,6 +63,7 @@ void UAVTelemetryServer::sender_loop() {
 		std::string json_pkg_as_string;
 
 		json_pkg_as_string = convert_json_pkg_to_string_of_array();
+		std::cout << "JSON SENT TO RUST: " << json_pkg_as_string << std::endl;
 		json_to_rust(json_pkg_as_string);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(update_rate));
@@ -90,7 +91,7 @@ void UAVTelemetryServer::update_json_pkg(const char *json_str, const struct sock
 	std::string id;
 	int id_int;
 
-	std::cout << "JSON fm Telemetry Server: " << json_str <<std::endl;
+	// std::cout << "JSON fm Telemetry Server: " << json_str <<std::endl;
 
 	try {
 		telemetry = nlohmann::json::parse(json_str);

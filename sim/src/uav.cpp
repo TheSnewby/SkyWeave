@@ -106,7 +106,7 @@ void UAV::uav_to_telemetry_server(int port = 6000) {
 	    { "timestamp", timestamp }
 	};
 	json_str = j.dump();
-	std::cout << "JSON to Telemetry Server: " << json_str << "\n";
+	// std::cout << "JSON to Telemetry Server: " << json_str << "\n";
 
 	//open a stream to a port
 	int socketfd;
