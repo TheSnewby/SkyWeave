@@ -101,29 +101,34 @@ export function useTelemetry(): TelemetryState {
 			try {
 				const data = JSON.parse(event.data);
 
-				// settings updates
-				if (data?.type === "settings_update") {
+				// Handle settings updates from the server
+				if (data && data.type === "settings_update" && data.payload) {
 					setSettings(data.payload);
 					return;
 				}
 
-				// initial UAV snapshot
+				// Initial snapshot: array of UavState
 				if (Array.isArray(data)) {
 					setUavs(data);
 					return;
 				}
 
-				// single UAV update
-				const update: UavState = data;
-				setUavs((prev) => {
-					const idx = prev.findIndex((u) => u.id === update.id);
-					if (idx === -1) return [...prev, update];
-					const copy = [...prev];
-					copy[idx] = update;
-					return copy;
-				});
+				// Incremental single-UAV update
+				if (data && typeof data === "object" && "id" in data && "position" in data) {
+					const update = data as UavState;
+					setUavs((prev) => {
+						const idx = prev.findIndex((u) => u.id === update.id);
+						if (idx === -1) return [...prev, update];
+						const copy = [...prev];
+						copy[idx] = update;
+						return copy;
+					});
+					return;
+				}
+
+				console.warn("Unknown telemetry message", data);
 			} catch (err) {
-				console.error("Failed to parse WS message", err);
+				console.error("Failed to parse WS message", err, event.data);
 			}
 		};
 
