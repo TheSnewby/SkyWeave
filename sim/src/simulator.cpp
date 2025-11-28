@@ -1,9 +1,4 @@
 #include "simulator.h"
-#include <iostream>
-#include <chrono>
-#include <random>
-#include <string>
-#include <iomanip>
 
 /**
  * print_swarm_status: prints all UAV's position and velocity to stdout
@@ -28,7 +23,7 @@ void UAVSimulator::print_swarm_status() {
  */
 UAVSimulator::UAVSimulator(int num_uavs) {
 	int i;
-	const double spacing = 5.0;
+	const double spacing = 10.0;
 	const double base_altitude = 50.0;
 
 	for (i = 0; i < num_uavs; i++) {

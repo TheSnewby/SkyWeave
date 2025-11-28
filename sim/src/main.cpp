@@ -9,7 +9,7 @@ int main() {
 
 	// initialize velocity for all UAVs
 	for (int i = 0; i < num_uav; i++) {
-		swarm[i].set_velocity(1.0, 1.0, 1.0);
+		swarm[i].set_velocity(1.0, 0.0, 1.0);
 	}
 
 	// start the simulator's internal loop (updates + telemetry)
@@ -17,16 +17,14 @@ int main() {
 
 	std::cout << "Simulation running with " << num_uav << " UAVs in V formation." << std::endl;
 
-	// simple monitor loop: print swarm status periodically
-	int cycles = 20;
-	for (int cycle = 0; cycle < cycles; cycle++) {
-		std::cout << "Cycle: " << cycle << std::endl;
+	// program is now an indefinite loop - must be terminated manually
+	while (true) {
 		sim.print_swarm_status();
 		std::cout.flush();
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
-	// optional: stop the sim if you later implement a blocking loop
+	// here for.. just in case.
 	sim.stop_sim();
 	return 0;
 }

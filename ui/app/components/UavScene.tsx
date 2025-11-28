@@ -30,14 +30,14 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
 
   // center frame on leader
   const originX = leader ? leader.position.x * scale : 0;
-  const originZ = leader ? leader.position.y * scale : 0;
+  const originZ = leader ? leader.position.z * scale : 0;
 
   // get some leader stats for HUD
   const headingDeg = leader ?
 	(Math.atan2(leader.velocity.vy, leader.velocity.vx) * 180) / Math.PI + 90
 	: null;
   const velocity = leader ? leader.velocity : null;
-  const altitude = leader ? leader.position.z : null;
+  const altitude = leader ? leader.position.y : null;
   const formation = "N/A"; // placeholder for future formation modes
 
   return (
@@ -107,8 +107,13 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
 
           // render positions in a frame centered on the leader so the grid moves with the swarm
           const headX = uav.position.x * scale - originX;
-          const headY = uav.position.z * scale + 0.75;
-          const headZ = uav.position.y * scale - originZ;
+          const headY = uav.position.y * scale + 0.75; // altitude
+          const headZ = uav.position.z * scale - originZ;
+
+          // scale UAV size slightly based on altitude: higher = larger, lower = smaller
+          const rawAlt = uav.position.y; // unscaled altitude from telemetry
+          const altNorm = Math.max(0, Math.min(1, rawAlt / 100)); // assume 0–100m typical band
+          const sizeFactor = 0.7 + altNorm * 0.8; // range ~0.7–1.5
 
           // maintain trail history
           let trail = trailsRef.current.get(uav.id);
@@ -129,6 +134,7 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
           }
 
           // fade trail colors
+          const trailPoints = trail;
           const trailColors: [number, number, number][] = trail.map((_, idx) => {
             // t = 0 for the newest point (end of trail), 1 for the oldest (tail)
             const t = trail.length > 1 ? 1 - idx / (trail.length - 1) : 0;
@@ -162,32 +168,38 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
 
           return (
             <group key={uav.id}>
-              {/* core glowing sphere */}
-              <mesh position={[headX, headY, headZ]}>
-                <sphereGeometry args={[0.4, 24, 24]} />
-                <meshStandardMaterial
-                  color={isLeader ? "#facc15" : "#22d3ee"} // gold for leader, cyan for followers
-                  emissive={isLeader ? "#eab308" : "#06b6d4"}
-                  emissiveIntensity={1.5}
-                />
-              </mesh>
+              {/* UAV glyph (core + halo) scaled by altitude */}
+              <group
+                position={[headX, headY, headZ]}
+                scale={[sizeFactor, sizeFactor, sizeFactor]}
+              >
+                {/* core glowing sphere */}
+                <mesh>
+                  <sphereGeometry args={[0.4, 24, 24]} />
+                  <meshStandardMaterial
+                    color={isLeader ? "#facc15" : "#22d3ee"} // gold for leader, cyan for followers
+                    emissive={isLeader ? "#eab308" : "#06b6d4"}
+                    emissiveIntensity={1.5}
+                  />
+                </mesh>
 
-              {/* soft halo around each UAV for extra glow */}
-              <mesh position={[headX, headY, headZ]}>
-                <sphereGeometry args={[0.7, 24, 24]} />
-                <meshStandardMaterial
-                  color={isLeader ? "#facc15" : "#22d3ee"}
-                  transparent
-                  opacity={0.15}
-                />
-              </mesh>
+                {/* soft halo around each UAV for extra glow */}
+                <mesh>
+                  <sphereGeometry args={[0.7, 24, 24]} />
+                  <meshStandardMaterial
+                    color={isLeader ? "#facc15" : "#22d3ee"}
+                    transparent
+                    opacity={0.15}
+                  />
+                </mesh>
+              </group>
 
               {/* animated, fading trail line using drei's Line */}
               {showTrails && trail.length >= 2 && (
                 <Line
-                  points={trail}
+                  points={trailPoints}
                   vertexColors={trailColors}
-                  lineWidth={isLeader ? 2.5 : 1.5}
+                  lineWidth={(isLeader ? 2.5 : 1.5) * (0.8 + altNorm * 0.4)}
                 />
               )}
             </group>
