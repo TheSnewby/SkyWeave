@@ -32,14 +32,6 @@ pub struct UavState {
     pub timestamp: DateTime<Utc>,
 }
 
-/// Telemetry sent over UDP as JSON from telemetry_encoder.cpp
-#[derive(Debug, Clone, Deserialize)]
-pub struct TelemetryFrame {
-    pub id: u64,
-    pub position: Position,
-    pub velocity: Velocity,
-	pub timestamp: DateTime<Utc>,
-}
 
 /// Swarm Behavior settings sent from the UI over WebSocket
 #[derive(Debug, Clone, Deserialize)]
@@ -168,11 +160,12 @@ pub async fn run_udp_listener(bind_addr: SocketAddr, shared: TelemetryShared) {
             };
 
             let data = &buf[..len];
-            tracing::debug!("Received {} bytes from {}", len, src);
+            tracing::info!("udp_recv: received {} bytes from {}", len, src);
 
             match decode_frame(data) {
                 Ok(uav) => {
                     let id = uav.id;
+                    tracing::info!("udp_recv: decoded telemetry frame for UAV {}", id);
                     shared.swarm.upsert_uav(uav.clone()).await;
 
                     // broadcast the update; ignore if there are no listeners.
