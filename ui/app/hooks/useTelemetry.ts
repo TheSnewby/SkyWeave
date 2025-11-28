@@ -187,5 +187,20 @@ export function useTelemetry(): TelemetryState {
 		};
 	}, []);
 
+	// Debug helper: log current UAV positions when they change
+	useEffect(() => {
+		if (uavs.length === 0) return;
+
+		console.log(
+			"UAV positions from useTelemetry:",
+			uavs.map((u) => ({
+				id: u.id,
+				x: u.position.x,
+				y: u.position.y,
+				z: u.position.z,
+			}))
+		);
+	}, [uavs]);
+
 	return { uavs, status, settings, send };
 }

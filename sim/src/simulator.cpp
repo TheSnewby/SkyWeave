@@ -44,7 +44,8 @@ UAVSimulator::UAVSimulator(int num_uavs) {
 
 		y = base_altitude;
 
-		UAV uav(i, x, y, z, 0);
+		int uav_port = 8000 + i;
+		UAV uav(i, uav_port, x, y, z);
 		swarm.push_back(uav);
 	}
 
