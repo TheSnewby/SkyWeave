@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <cmath>
 
 
 
@@ -48,6 +49,11 @@ public:
 		id(set_id), port(set_port), pos{x, y, z}, vel{0, 0, 0} {}
 
 	// Setters
+	void set_position(double x, double y, double z) { pos = {x, y, z}; }
+	void set_posx(double x) { pos[0] = x; }
+	void set_posy(double y) { pos[1] = y; }
+	void set_posz(double z) { pos[2] = z; }
+
 	void set_velocity(double x, double y, double z) { vel = {x, y, z}; }
 	void set_velx(double x) { vel[0] = x; }
 	void set_vely(double y) { vel[1] = y; }

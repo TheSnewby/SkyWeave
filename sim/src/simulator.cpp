@@ -22,35 +22,20 @@ void UAVSimulator::print_swarm_status() {
  * Constructor for UAVSimulator
  */
 UAVSimulator::UAVSimulator(int num_uavs) {
-	int i;
-	const double spacing = 10.0;
-	const double base_altitude = 50.0;
-
-	for (i = 0; i < num_uavs; i++) {
-		double x, y, z;
-
-		// leader front and center
-		if (i == 0) {
-			x = 0.0;
-			z = 0.0;
-		} else {
-			// VEE formation - two per wing
-			int wing = (i + 1) / 2;              // 1,1,2,2,...
-			int side = (i % 2 == 1) ? -1 : 1;    // left/right
-
-			x = side * wing * spacing;          // horizontal offset
-			z = wing * spacing;                 // distance behind leader
-		}
-
-		y = base_altitude;
-
-		int uav_port = 8000 + i;
-		UAV uav(i, uav_port, x, y, z);
-		swarm.push_back(uav);
-	}
+	swarm.reserve(num_uavs);
+	create_formation_random(num_uavs);		// default, but can change to anything
+	// create_formation_circle(num_uavs); 	// for debug
+	// create_formation_line(num_uavs); 	// for debug
+	// create_formation_vee(num_uavs);		// for debug
 
 	std::cout << "Created swarm with " << num_uavs << " UAVs" << std::endl;
 	print_swarm_status();
+	// set_formation_line(num_uavs);		// for testing each formation setter
+	// print_swarm_status();
+	// set_formation_vee(num_uavs);
+	// print_swarm_status();
+	// set_formation_circle(num_uavs);
+	// print_swarm_status();
 };
 
 /**
@@ -96,4 +81,195 @@ void UAVSimulator::start_sim() {
 void UAVSimulator::stop_sim() {
 	running = false;
 
+}
+
+/**
+ * create_formation_random - randomizes the placement of UAVs
+ * @num_uavs: number of uavs to generate
+ */
+void UAVSimulator::create_formation_random(int num_uavs) {
+	int i;
+	const double base_altitude = 50.00;
+	std::random_device rd; /* randomizer */
+	std::mt19937 gen(rd()); /* super randomizer */
+
+	// generator of a super random number within a bounded uniform distribution
+	std::uniform_real_distribution<> distrib(-10.0, 10.0);
+
+	// generate a swarm of uavs
+	for (i = 0; i < num_uavs; i++) {
+		if (i == 0)
+			swarm.push_back(UAV(i, 8000 + i, 0, 0, base_altitude));
+		else
+			swarm.push_back(UAV(i, 8000 + i, distrib(gen), distrib(gen), distrib(gen) + base_altitude));
+	}
+}
+
+/**
+ * create_formation_line - create and places UAVs in a line
+ * @num_uavs: number of uavs to generate
+ */
+void UAVSimulator::create_formation_line(int num_uavs) {
+	int i;
+	const double spacing = 10.0; //might make dependent on user-input
+	const double base_altitude = 50.0;
+
+	for (i = 0; i < num_uavs; i++) {
+		double x, y, z;
+
+		// leader front and center
+		if (i == 0) {
+			x = 0.0;
+			z = 0.0;
+		} else {			int wing = (i + 1) / 2;              // 1,1,2,2,...
+			int side = (i % 2 == 1) ? -1 : 1;    // left/right
+
+			x = side * wing * spacing;          // horizontal offset
+			z = 0;                 				// distance behind leader
+		}
+
+		y = base_altitude;
+
+		int uav_port = 8000 + i;
+		UAV uav(i, uav_port, x, y, z);
+		swarm.push_back(uav);
+	}
+}
+
+
+/**
+ * create_formation_vee - creates and places uavs in a flying vee
+ * @num_uavs: number of uavs to generate
+ */
+void UAVSimulator::create_formation_vee(int num_uavs) {
+	int i;
+	const double spacing = 10.0; //might make dependent on user-input
+	const double base_altitude = 50.0;
+
+	for (i = 0; i < num_uavs; i++) {
+		double x, y, z;
+
+		// leader front and center
+		if (i == 0) {
+			x = 0.0;
+			z = 0.0;
+		} else {
+			// VEE formation - two per wing
+			int wing = (i + 1) / 2;              // 1,1,2,2,...
+			int side = (i % 2 == 1) ? -1 : 1;    // left/right
+
+			x = side * wing * spacing;          // horizontal offset
+			z = wing * spacing;                 // distance behind leader
+		}
+
+		y = base_altitude;
+
+		int uav_port = 8000 + i;
+		UAV uav(i, uav_port, x, y, z);
+		swarm.push_back(uav);
+	}
+}
+
+/**
+ * create_formation_circle - creates and places uavs in a circle
+ * @num_uavs: number of uavs to generate
+ */
+void UAVSimulator::create_formation_circle(int num_uavs) {
+	int i;
+	const double radius = 10.0; //might make dependent on user-input
+	const double base_altitude = 50.0;
+
+	for (i = 0; i < num_uavs; i++) {
+		double x, y, z;
+
+		// leader front and center
+		if (i == 0) {
+			x = 0.0;
+			z = 0.0;
+		} else {
+			double angle = 2.0 * M_PI * i / num_uavs;
+			x = radius * std::cos(angle);
+			z = radius * std::sin(angle);
+		}
+
+		y = base_altitude;
+
+		int uav_port = 8000 + i;
+		UAV uav(i, uav_port, x, y, z);
+		swarm.push_back(uav);
+	}
+}
+
+/**
+ * set_formation_line - randomizes the placement of UAVs
+ * @num_uavs: number of uavs to generate
+ */
+void UAVSimulator::set_formation_line(int num_uavs) {
+	int i;
+	const double spacing = 10.0; //might make dependent on user-input
+	double leader_y = swarm[0].get_y();
+	double leader_z = swarm[0].get_z();
+
+	for (i = 1; i < num_uavs; i++) {
+		double x, y, z;
+
+		int wing = (i + 1) / 2;              // 1,1,2,2,...
+		int side = (i % 2 == 1) ? -1 : 1;    // left/right
+
+		x = side * wing * spacing;          // horizontal offset
+
+		swarm[i].set_position(x, leader_y, leader_z);
+	}
+}
+
+
+/**
+ * set_formation_vee - randomizes the placement of UAVs
+ * @num_uavs: number of uavs to generate
+ */
+void UAVSimulator::set_formation_vee(int num_uavs) {
+	int i;
+	const double spacing = 10.0; //might make dependent on user-input
+	double leader_x = swarm[0].get_x();
+	double leader_y = swarm[0].get_y();
+	double leader_z = swarm[0].get_z();
+
+	for (i = 1; i < num_uavs; i++) {
+		double x, y, z;
+
+		// VEE formation - two per wing
+		int wing = (i + 1) / 2;              // 1,1,2,2,...
+		int side = (i % 2 == 1) ? -1 : 1;    // left/right
+
+		x = leader_x + side * wing * spacing;          // horizontal offset
+		z = leader_z + wing * spacing;                 // distance behind leader
+
+		y = leader_y;
+
+		swarm[i].set_position(x, y, z);
+	}
+}
+
+/**
+ * set_formation_circle - randomizes the placement of UAVs
+ * @num_uavs: number of uavs to generate
+ */
+void UAVSimulator::set_formation_circle(int num_uavs) {
+	int i;
+	const double radius = 10.0; //might make dependent on user-input
+	double leader_x = swarm[0].get_x();
+	double leader_y = swarm[0].get_y();
+	double leader_z = swarm[0].get_z();
+
+	for (i = 1; i < num_uavs; i++) {
+		double x, y, z;
+
+		double angle = 2.0 * M_PI * i / num_uavs;
+		x = leader_x + radius * std::cos(angle);
+		z = leader_z + radius * std::sin(angle);
+
+		y = leader_y;
+
+		swarm[i].set_position(x, y, z);
+	}
 }
