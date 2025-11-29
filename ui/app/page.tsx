@@ -100,46 +100,48 @@ export default function TelemetryPage() {
 
   if (showSplash) {
     return (
-      <main className="min-h-screen w-full bg-black text-white flex justify-center items-center">
-        <div className="max-w-xl w-full px-6 text-center crt-scanlines mc-panel py-10 flex flex-col items-center justify-center">
-          <div className="mb-6 flex justify-center items-center w-full">
+      <main
+        className="min-h-screen w-full bg-black text-white flex justify-center items-center bg-[url('/skyweave_splash_background.jpg')] bg-cover bg-center bg-no-repeat"
+      >
+        <div className="max-w-3xl w-full px-4 text-center crt-scanlines mc-panel py-1 flex flex-col items-center justify-center shadow-[0_0_25px_6px_rgba(0,255,140,0.8)]">
+          <div className="mb-1 mt-1 flex justify-center items-center w-full">
             <svg
-              viewBox="0 0 200 60"
-              className="w-64 h-20 mx-auto block"
+              viewBox="0 0 200 30"
+              className="w-80 h-28 mx-auto block"
               aria-hidden="true"
             >
               <g>
-                <polygon points="46,10 66,20 46,30" fill="#22d3ee" />
-                <polygon points="78,10 98,20 78,30" fill="#22d3ee" />
-                <polygon points="110,10 130,20 110,30" fill="#22d3ee" />
-                <polygon points="142,5 162,20 142,35" fill="#facc15" />
+                <polygon points="30,0 60,20 30,40" fill="#22d3ee" />
+                <polygon points="72,0 102,20 72,40" fill="#22d3ee" />
+                <polygon points="114,0 144,20 114,40" fill="#22d3ee" />
+                <polygon points="156,-5 186,20 156,45" fill="#facc15" />
               </g>
             </svg>
           </div>
-          <h1 className="text-4xl md:text-5xl font-semibold nasa-text mb-2 mx-auto pl-2">
+          <h1 className="text-4xl md:text-5xl font-semibold nasa-text tracking-wide mb-3 mx-auto pl-2">
             SkyWeave
           </h1>
-          <p className="text-zinc-400 text-sm md:text-base mb-6">Control autonomous UAV swarms with real-time telemetry and commands.</p>
+          <p className="text-zinc-400 text-lg md:text-xl mb-6 font-orbitron tracking-wider">Control autonomous UAV swarms with real-time telemetry and commands.</p>
           <div className="mt-8 w-full grid grid-cols-3 place-items-center gap-4">
             <button
-              className="mc-button nasa-text text-xs px-5"
+              className="mc-button nasa-text text-xs px-5 btn-glow tracking-wider"
               onClick={() => router.push("/guide")}
             >
-              Guide
+              GUIDE
             </button>
 
             <button
-              className="mc-button nasa-text text-base px-10 py-3"
+              className="mc-button nasa-text text-base px-10 py-3 btn-glow tracking-wider"
               onClick={() => setShowSplash(false)}
             >
-              Launch
+              LAUNCH
             </button>
 
             <button
-              className="mc-button nasa-text text-xs px-5"
+              className="mc-button nasa-text text-xs px-5 btn-glow tracking-wider"
               onClick={() => router.push("/developers")}
             >
-              Developers
+              DEVELOPERS
             </button>
           </div>
         </div>

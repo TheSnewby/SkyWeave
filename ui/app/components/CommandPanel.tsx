@@ -77,7 +77,7 @@ export default function CommandPanel({ onCommand, status }: CommandPanelProps) {
   }, [isDisabled]);
 
   return (
-    <section className="mc-panel mc-panel-inner bg-gradient-to-b from-black/80 to-black/95 nasa-text text-xs border border-emerald-700/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+    <section className="mc-panel mc-panel-inner bg-gradient-to-b from-emerald-900/60 to-black/85 nasa-text text-xs border border-emerald-400/60 shadow-[0_0_22px_rgba(16,185,129,0.55)]">
       <h2 className="mb-4">
         <div className="inline-flex items-center px-3 py-2 rounded-sm border border-emerald-400/70 bg-emerald-900/40 shadow-[0_0_18px_rgba(16,185,129,0.7)]">
           <span className="uppercase tracking-[0.3em] text-[0.8rem] font-semibold text-emerald-200 drop-shadow-[0_0_8px_rgba(16,185,129,0.95)]">

@@ -50,45 +50,53 @@ export default function TelemetryTable({ uavs }: Props) {
             <tr>
               <td
                 className="px-4 py-6 text-center nasa-text text-emerald-300 tracking-widest uppercase"
-                colSpan={7}
+                colSpan={6}
               >
                 NO TELEMETRY // STANDBY
               </td>
             </tr>
           ) : (
-            uavs.map((uav) => (
-              <tr
-                key={uav.id}
-                className="border-b border-emerald-900/40 last:border-b-0 hover:bg-emerald-900/10"
-              >
-                <td className="px-4 py-2 nasa-text text-emerald-100">
-				  {uav.id}
-				</td>
-                <td className="px-4 py-2 nasa-text text-emerald-100">
-                  {uav.position.x.toFixed(1)}
-                </td>
-                <td className="px-4 py-2 nasa-text text-emerald-100">
-                  {uav.position.y.toFixed(1)}
-                </td>
-                <td className="px-4 py-2 nasa-text text-emerald-100">
-                  {uav.position.z.toFixed(1)}
-                </td>
-                <td className="px-4 py-2 nasa-text text-emerald-100">
-                  {uav.velocity.vx.toFixed(1)}
-                </td>
-				<td className="px-4 py-2 nasa-text text-emerald-100">
-				  {uav.velocity.vy.toFixed(1)}
-                </td>
-				<td className="px-4 py-2 nasa-text text-emerald-100">
-				  {uav.velocity.vz.toFixed(1)}
-                </td>
-                <td className="px-4 py-2 nasa-text text-emerald-100">
-                  {uav.timestamp
-                    ? new Date(uav.timestamp).toLocaleTimeString()
-                    : "—"}
-                </td>
-              </tr>
-            ))
+            uavs.map((uav) => {
+              const speed = Math.sqrt(
+                uav.velocity.vx * uav.velocity.vx +
+                uav.velocity.vy * uav.velocity.vy +
+                uav.velocity.vz * uav.velocity.vz
+              );
+
+              const isLeader = uav.id === 0;
+
+              return (
+                <tr
+                  key={uav.id}
+                  className={
+                    (isLeader
+                      ? "bg-emerald-900/20 hover:bg-emerald-900/20 shadow-[0_-2px_12px_rgba(16,185,129,0.45),0_2px_12px_rgba(16,185,129,0.45)]"
+                      : "border-b border-emerald-900/40 last:border-b-0 hover:bg-emerald-900/10")
+                  }
+                >
+                  <td className="px-4 py-2 nasa-text text-emerald-100">
+				    {uav.id}
+				  </td>
+                  <td className="px-4 py-2 nasa-text text-emerald-100">
+                    {uav.position.x.toFixed(1)}
+                  </td>
+                  <td className="px-4 py-2 nasa-text text-emerald-100">
+                    {uav.position.y.toFixed(1)}
+                  </td>
+                  <td className="px-4 py-2 nasa-text text-emerald-100">
+                    {uav.position.z.toFixed(1)}
+                  </td>
+                  <td className="px-4 py-2 nasa-text text-emerald-100">
+                    {speed.toFixed(1)}
+                  </td>
+                  <td className="px-4 py-2 nasa-text text-emerald-100">
+                    {uav.timestamp
+                      ? new Date(uav.timestamp).toLocaleTimeString()
+                      : "—"}
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>
