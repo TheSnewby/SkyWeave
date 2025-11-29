@@ -103,27 +103,7 @@ export default function TelemetryPage() {
       <main
         className="min-h-screen w-full bg-black text-white flex justify-center items-center bg-[url('/skyweave_splash_background.jpg')] bg-cover bg-center bg-no-repeat"
       >
-<<<<<<< HEAD
-          <style jsx>{`
-            @keyframes pulseGlow {
-              0% {
-                box-shadow: 0 0 20px 4px rgba(0, 255, 140, 0.5);
-              }
-              50% {
-                box-shadow: 0 0 35px 10px rgba(0, 255, 160, 0.9);
-              }
-              100% {
-                box-shadow: 0 0 20px 4px rgba(0, 255, 140, 0.5);
-              }
-            }
-            .pulse-glow {
-              animation: pulseGlow 2.5s ease-in-out infinite;
-            }
-          `}</style>
-        <div className="max-w-3xl w-full px-4 text-center crt-scanlines mc-panel py-1 flex flex-col items-center justify-center pulse-glow">
-=======
         <div className="max-w-3xl w-full px-4 text-center crt-scanlines mc-panel py-1 flex flex-col items-center justify-center shadow-[0_0_25px_6px_rgba(0,255,140,0.8)]">
->>>>>>> fe55c13b36e61e095aa83dfdd32265b4acd50468
           <div className="mb-1 mt-1 flex justify-center items-center w-full">
             <svg
               viewBox="0 0 200 30"
