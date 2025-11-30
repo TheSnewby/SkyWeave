@@ -193,7 +193,7 @@ void UAVSimulator::create_formation_vee(int num_uavs) {
 			int side = (i % 2 == 1) ? -1 : 1;    // left/right
 
 			x = side * wing * spacing;          // horizontal offset
-			y = wing * spacing;                 // distance behind leader
+			y = -wing * spacing;                // distance behind leader (flipped)
 		}
 
 		z = base_altitude;
@@ -276,7 +276,7 @@ void UAVSimulator::set_formation_vee(int num_uavs) {
 		int side = (i % 2 == 1) ? -1 : 1;    // left/right
 
 		x = leader_x + side * wing * spacing;          // horizontal offset
-		y = leader_y + wing * spacing;                 // distance behind leader
+		y = leader_y - wing * spacing;                 // distance behind leader (flipped)
 
 		z = leader_z;
 
