@@ -30,7 +30,7 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
 
   // center frame on leader
   const originX = leader ? leader.position.x * scale : 0;
-  const originZ = leader ? leader.position.y * scale : 0;
+  const originZ = 0; // do not center depth so formation shape is preserved
 
   // get some leader stats for HUD
   const headingDeg = leader ?
@@ -108,7 +108,7 @@ export default function UavScene({ uavs, showTrails = true }: Props) {
           // render positions in a frame centered on the leader so the grid moves with the swarm
           const headX = uav.position.x * scale - originX;
           const headY = uav.position.z * scale + 0.75; // altitude now uses z
-          const headZ = uav.position.y * scale - originZ; // horizontal depth now uses y
+          const headZ = uav.position.y * scale; // depth uses y directly; no centering
 
           // scale UAV size slightly based on altitude: higher = larger, lower = smaller
           const rawAlt = uav.position.z; // altitude now uses z
