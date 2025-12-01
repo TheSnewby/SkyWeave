@@ -30,9 +30,9 @@ UAVSimulator::UAVSimulator(int num_uavs) {
 	// create_formation_vee(num_uavs);
 
 	std::cout << "Created swarm with " << num_uavs << " UAVs" << std::endl;
-	// print_swarm_status();
-	set_formation_line(num_uavs);		// for testing each formation setter
 	print_swarm_status();
+	set_formation_line(num_uavs);		// for testing each formation setter
+	// print_swarm_status();
 	// set_formation_vee(num_uavs);
 	// print_swarm_status();
 	// set_formation_circle(num_uavs);
@@ -46,6 +46,15 @@ UAVSimulator::~UAVSimulator() {
 	stop_sim();
 }
 
+void UAVSimulator::start_turn_timer() {
+	turn_timer_thread = std::thread([this] () {
+		std::this_thread::sleep_for(std::chrono::seconds(3));
+		if (running)
+			swarm[0].set_velocity(-1, 0, 0);
+	});
+	turn_timer_thread.detach();
+}
+
 /**
  * start_sim -	starts the simulation loop in a separate thread,
  *				updating UAV positions and sending telemetry to server
@@ -55,6 +64,8 @@ void UAVSimulator::start_sim() {
 		return;
 
 	running = true;
+
+	start_turn_timer();
 
 	std::thread([this]() {
 		using namespace std::chrono;
@@ -221,7 +232,7 @@ void UAVSimulator::create_formation_circle(int num_uavs) {
 			x = 0.0;
 			y = 0.0;
 		} else {
-			double angle = 2.0 * M_PI * i / num_uavs;
+			double angle = 2.0 * M_PI * i / (num_uavs - 1);
 			x = radius * std::cos(angle);
 			y = radius * std::sin(angle);
 		}

@@ -316,7 +316,7 @@ void UAV::apply_boids_forces() {
 	// std::cout << "Actual new_velocity[2]: " << new_velocity[2] << std::endl;
 
 	// DEBUG PRINTOUT:
-	// /*
+	/*
 	std::cout << "UAV " << get_id() << " forces: "
 	<< "cohesion(" << cohesion_force[0] << "," << cohesion_force[1] << "," << cohesion_force[2] << ") "
 	<< "separation(" << separation_force[0] << "," << separation_force[1] << "," << separation_force[2] << ") "
