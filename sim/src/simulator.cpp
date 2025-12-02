@@ -357,13 +357,13 @@ void UAVSimulator::command_listener_loop() {
 			command.pop_back();
 		}
 
-		if (command == "1" || command == "LINE")
+		if (command == "1" || command == "line")
 			change_formation(LINE);
-		else if (command == "2" || command == "VEE")
+		else if (command == "2" || command == "vee")
 			change_formation(FLYING_V);
-		else if (command == "3" || command == "CIRCLE")
+		else if (command == "3" || command == "circle")
 			change_formation(CIRCLE);
-		else if (command.rfind("MOVE LEADER", 0) == 0) {
+		else if (command.rfind("move_leader", 0) == 0) {
 			std::stringstream ss(command);
 			std::string tag;
 			std::string dir;
@@ -372,13 +372,13 @@ void UAVSimulator::command_listener_loop() {
 			double dx = 0.0;
 			double dy = 0.0;
 
-			if (dir == "NORTH")
+			if (dir == "north")
 				dy = -1.0;
-			else if (dir == "SOUTH")
+			else if (dir == "south")
 				dy = 1.0;
-			else if (dir == "EAST")
+			else if (dir == "east")
 				dx = 1.0;
-			else if (dir == "WEST")
+			else if (dir == "west")
 				dx = -1.0;
 
 			if (!swarm.empty()) {
@@ -389,7 +389,7 @@ void UAVSimulator::command_listener_loop() {
 			}
 		}
 
-		else if (command.rfind("ALTITUDE_CHANGE", 0) == 0) {
+		else if (command.rfind("altitude_change", 0) == 0) {
 			std::stringstream ss(command);
 			std::string tag;
 			double delta = 0.0;
