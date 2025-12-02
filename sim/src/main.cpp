@@ -8,11 +8,8 @@ int main() {
 	UAVSimulator sim(num_uav);
 	std::vector<UAV>& swarm = sim.get_swarm();
 
-	// initialize velocity for all UAVs
-	for (int i = 0; i < num_uav; i++) {
-		swarm[i].set_velocity(1.0, 1.0, 1.0);
-	}
-
+	// start the simulator's command listener (for UI / Rust commands)
+	sim.start_command_listener();
 	// start the simulator's internal loop (updates + telemetry)
 	sim.start_sim();
 

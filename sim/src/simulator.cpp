@@ -132,10 +132,28 @@ void UAVSimulator::create_formation_random(int num_uavs) {
 
 	// generate a swarm of uavs
 	for (i = 0; i < num_uavs; i++) {
-		if (i == 0)
-			swarm.push_back(UAV(i, 8000 + i, 0, 0, base_altitude));
-		else
-			swarm.push_back(UAV(i, 8000 + i, distrib(gen), distrib(gen), distrib(gen) + base_altitude));
+		double x, y, z;
+
+		if (i == 0) {
+			// place leader at origin at base altitude
+			x = 0.0;
+			y = 0.0;
+			z = base_altitude;
+		} else {
+			// randomly place other uavs around leader
+			x = distrib(gen);
+			y = distrib(gen);
+			z = distrib(gen) + base_altitude;
+		}
+
+		int uav_port = 8000 + i;
+		UAV uav(i, uav_port, x, y, z);
+
+		// set initial velocity to move forward in negative Y direction
+		const double forward_speed = -1.0;
+		uav.set_velocity(0.0, 0.0, 0.0); // 0.0, forward_speed, 0.0);
+
+		swarm.push_back(uav);
 	}
 }
 
