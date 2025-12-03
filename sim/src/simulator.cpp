@@ -22,15 +22,6 @@ void UAVSimulator::print_swarm_status()
 /**
  * Constructor for UAVSimulator
  */
-<<<<<<< HEAD
-UAVSimulator::UAVSimulator(int num_uavs)
-{
-	swarm.reserve(num_uavs);		   // allocates memory to reduce resizing slowdowns
-	create_formation_random(num_uavs); // default, but can change to anything
-	// create_formation_circle(num_uavs); 	// for testing each formation creator
-	// create_formation_line(num_uavs);
-	// create_formation_vee(num_uavs);
-=======
 UAVSimulator::UAVSimulator(int num_uavs) {
 	swarm.reserve(num_uavs); 				// allocates memory to reduce resizing slowdowns
 	// creates a LINE formation
@@ -43,7 +34,6 @@ UAVSimulator::UAVSimulator(int num_uavs) {
 		std::array<double, 3> offset = swarm[0].get_SwarmCoord().get_formation_offset(i);
 		swarm[i].set_position(offset[0] + swarm[i].get_x(), offset[1] + swarm[i].get_y(), offset[2] + swarm[i].get_z());
 	}
->>>>>>> main
 
 	std::cout << "Created swarm with " << num_uavs << " UAVs" << std::endl;
 	print_swarm_status();
@@ -57,23 +47,6 @@ UAVSimulator::~UAVSimulator()
 	stop_sim();
 }
 
-<<<<<<< HEAD
-// void UAVSimulator::start_turn_timer()
-//  {
-//	turn_timer_thread = std::thread([this](){
-//		std::this_thread::sleep_for(std::chrono::seconds(10));
-//		if (running)
-//			swarm[0].set_velocity(1, 1, 0);
-//
-//		std::this_thread::sleep_for(std::chrono::seconds(20));
-//		if (running)
-//			change_formation(FLYING_V);
-//		std::this_thread::sleep_for(std::chrono::seconds(20));
-//		if (running)
-//			change_formation(CIRCLE); });
-//	turn_timer_thread.detach();
-//  }
-=======
 void UAVSimulator::start_turn_timer()
 {
 	turn_timer_thread = std::thread([this](){
@@ -89,7 +62,6 @@ void UAVSimulator::start_turn_timer()
 			change_formation(CIRCLE); });
 	turn_timer_thread.detach();
 }
->>>>>>> main
 
 /**
  * start_sim -	starts the simulation loop in a separate thread,
@@ -102,11 +74,7 @@ void UAVSimulator::start_sim()
 
 	running = true;
 
-<<<<<<< HEAD
 	//	start_turn_timer();
-=======
-	// start_turn_timer(); // TOGGLE IF YOU WANT PREPLANNED ITENERARY
->>>>>>> main
 
 	std::thread([this]()
 				{
