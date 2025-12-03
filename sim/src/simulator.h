@@ -8,6 +8,7 @@
 #include <random>
 #include <string>
 #include <iomanip>
+#include <cstring>
 
 class UAV; 
 

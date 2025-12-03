@@ -8,8 +8,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "ws": "^8.18.3"
-  }
+  },
+  "description": ""
 }

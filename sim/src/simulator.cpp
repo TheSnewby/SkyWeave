@@ -31,7 +31,6 @@ UAVSimulator::UAVSimulator(int num_uavs) {
 
 	std::cout << "Created swarm with " << num_uavs << " UAVs" << std::endl;
 	print_swarm_status();
-	change_formation(LINE);
 	// set_formation_line(num_uavs);		// for testing each formation setter
 	// print_swarm_status();
 	// set_formation_vee(num_uavs);
@@ -47,21 +46,21 @@ UAVSimulator::~UAVSimulator() {
 	stop_sim();
 }
 
-void UAVSimulator::start_turn_timer() {
-	turn_timer_thread = std::thread([this] () {
-		std::this_thread::sleep_for(std::chrono::seconds(10));
-		if (running)
-			swarm[0].set_velocity(1, 1, 0);
-
-		std::this_thread::sleep_for(std::chrono::seconds(20));
-		if (running)
-			change_formation(FLYING_V);
-		std::this_thread::sleep_for(std::chrono::seconds(20));
-		if (running)
-			change_formation(CIRCLE);
-	});
-	turn_timer_thread.detach();
-}
+//void UAVSimulator::start_turn_timer()
+// {
+//	turn_timer_thread = std::thread([this](){
+//		std::this_thread::sleep_for(std::chrono::seconds(10));
+//		if (running)
+//			swarm[0].set_velocity(1, 1, 0);
+//
+//		std::this_thread::sleep_for(std::chrono::seconds(20));
+//		if (running)
+//			change_formation(FLYING_V);
+//		std::this_thread::sleep_for(std::chrono::seconds(20));
+//		if (running)
+//			change_formation(CIRCLE); });
+//	turn_timer_thread.detach();
+// }
 
 /**
  * start_sim -	starts the simulation loop in a separate thread,
@@ -73,7 +72,7 @@ void UAVSimulator::start_sim() {
 
 	running = true;
 
-	// start_turn_timer();
+//	start_turn_timer();
 
 	std::thread([this]() {
 		using namespace std::chrono;
@@ -99,11 +98,11 @@ void UAVSimulator::start_sim() {
 						);
 					}
 				}
-				if (i != 0) {
-					// should something be updated here?
-					swarm[i].apply_boids_forces();
-				}
+				// boids forces skipped for now, reenable later for autonomous behavior
+				// if (i != 0)
+				//	swarm[i].apply_boids_forces();
 			}
+
 			std::this_thread::sleep_for(sleep_duration);
 		}
 	}).detach();
@@ -116,7 +115,7 @@ void UAVSimulator::stop_sim() {
 
 /**
  * change_formation - changes formation of swarm
- * @f: formation enum (1: LINE, 2: FLYING_V, 3: CIRCLE)
+ * @f: formation enum (1: LINE, 2: FLYING_VEE, 3: CIRCLE)
  */
 void UAVSimulator::change_formation(formation f) {
 	int uav_nums = swarm.size();
@@ -135,13 +134,16 @@ void UAVSimulator::change_formation(formation f) {
 
 	if (f == 1)
 	{
-		std::cout << "\nFORMATION CHANGED TO LINE." << std::endl;
+		set_formation_line(uav_nums);
+		std::cout << "Formation changed to LINE." << std::endl;
 	} else if (f == 2)
 	{
-		std::cout << "\nFORMATION CHANGED TO FLYING VEE." << std::endl;
+		set_formation_vee(uav_nums);
+		std::cout << "Formation changed to FLYING VEE." << std::endl;
 	} else if (f == 3)
 	{
-		std::cout << "\nFORMATION CHANGED TO CIRCLE." << std::endl;
+		set_formation_circle(uav_nums);
+		std::cout << "Formation changed to CIRCLE." << std::endl;
 	}
 }
 
@@ -160,15 +162,33 @@ void UAVSimulator::create_formation_random(int num_uavs) {
 
 	// generate a swarm of uavs
 	for (i = 0; i < num_uavs; i++) {
-		if (i == 0)
-			swarm.push_back(UAV(i, 8000 + i, 0, 0, base_altitude));
-		else
-			swarm.push_back(UAV(i, 8000 + i, distrib(gen), distrib(gen), distrib(gen) + base_altitude));
+		double x, y, z;
+
+		if (i == 0) {
+			// place leader at origin at base altitude
+			x = 0.0;
+			y = 0.0;
+			z = base_altitude;
+		} else {
+			// randomly place other uavs around leader
+			x = distrib(gen);
+			y = distrib(gen);
+			z = distrib(gen) + base_altitude;
+		}
+
+		int uav_port = 8000 + i;
+		UAV uav(i, uav_port, x, y, z);
+
+		// set initial velocity to move forward in negative Y direction
+		const double forward_speed = -1.0;
+		uav.set_velocity(0.0, 0.0, 0.0); // 0.0, forward_speed, 0.0);
+
+		swarm.push_back(uav);
 	}
 }
 
 /**
- * create_formation_line - [DEPRECATED] create and places UAVs in a line
+ * create_formation_line - create and places UAVs in a line
  * @num_uavs: number of uavs to generate
  */
 void UAVSimulator::create_formation_line(int num_uavs) {
@@ -201,7 +221,7 @@ void UAVSimulator::create_formation_line(int num_uavs) {
 
 
 /**
- * create_formation_vee - [DEPRECATED] creates and places uavs in a flying vee
+ * create_formation_vee - creates and places uavs in a flying vee
  * @num_uavs: number of uavs to generate
  */
 void UAVSimulator::create_formation_vee(int num_uavs) {
@@ -234,7 +254,7 @@ void UAVSimulator::create_formation_vee(int num_uavs) {
 }
 
 /**
- * create_formation_circle - [DEPRECATED] creates and places uavs in a circle
+ * create_formation_circle - creates and places uavs in a circle
  * @num_uavs: number of uavs to generate
  */
 void UAVSimulator::create_formation_circle(int num_uavs) {
@@ -250,7 +270,7 @@ void UAVSimulator::create_formation_circle(int num_uavs) {
 			x = 0.0;
 			y = 0.0;
 		} else {
-			double angle = 2.0 * M_PI * i / (num_uavs - 1);
+			double angle = 2.0 * M_PI * i / num_uavs;
 			x = radius * std::cos(angle);
 			y = radius * std::sin(angle);
 		}
@@ -264,7 +284,7 @@ void UAVSimulator::create_formation_circle(int num_uavs) {
 }
 
 /**
- * set_formation_line - [DEPRECATED] randomizes the placement of UAVs
+ * set_formation_line - randomizes the placement of UAVs
  * @num_uavs: number of uavs to generate
  */
 void UAVSimulator::set_formation_line(int num_uavs) {
@@ -287,7 +307,7 @@ void UAVSimulator::set_formation_line(int num_uavs) {
 
 
 /**
- * set_formation_vee - [DEPRECATED] randomizes the placement of UAVs
+ * set_formation_vee - randomizes the placement of UAVs
  * @num_uavs: number of uavs to generate
  */
 void UAVSimulator::set_formation_vee(int num_uavs) {
@@ -314,7 +334,7 @@ void UAVSimulator::set_formation_vee(int num_uavs) {
 }
 
 /**
- * set_formation_circle - [DEPRECATED] randomizes the placement of UAVs
+ * set_formation_circle - randomizes the placement of UAVs
  * @num_uavs: number of uavs to generate
  */
 void UAVSimulator::set_formation_circle(int num_uavs) {
@@ -327,7 +347,7 @@ void UAVSimulator::set_formation_circle(int num_uavs) {
 	for (i = 1; i < num_uavs; i++) {
 		double x, y, z;
 
-		double angle = 2.0 * M_PI * (i - 1) / (num_uavs - 1);
+		double angle = 2.0 * M_PI * i / num_uavs;
 		x = leader_x + radius * std::cos(angle);
 		y = leader_y + radius * std::sin(angle);
 
@@ -350,34 +370,90 @@ void UAVSimulator::stop_command_listener() {
 
 
 void UAVSimulator::command_listener_loop() {
-	int socketfd = socket(AF_INET, SOCK_DGRAM, 0);
-	struct sockaddr_in addr;
-	char buffer[64] = {0};
+	int socketfd = socket(AF_INET6, SOCK_DGRAM, 0);
+	struct sockaddr_in6 addr;
+	char buffer[1024] = {0};
 
 	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
-	addr.sin_port = htons(command_port);
+	addr.sin6_family = AF_INET6;
+	addr.sin6_addr = in6addr_any;       // listen on all IPv6 interfaces (including WireGuard)
+	addr.sin6_port = htons(command_port);
 
 	if (bind(socketfd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-		std::cout << "Failed to bind command listener to port " << command_port << std::endl;
+		std::cout << "Failed to bind IPv6 command listener to port " << command_port << std::endl;
 		return;
 	}
 
-	std::cout << "Command listener started on port " << command_port << std::endl;
+	std::cout << "IPv6 command listener started on port " << command_port << std::endl;
 
 	while (command_listener_running) {
 		ssize_t received = recvfrom(socketfd, buffer, sizeof(buffer) - 1, 0 , nullptr, nullptr);
-		std::string command(buffer);
-
-		if (command == "1") {
-			change_formation(LINE);
-		} else if (command == "2") {
-			change_formation(FLYING_V);
-		} else if (command == "3") {
-			change_formation(CIRCLE);
+		if (received <= 0) {
+			continue;
 		}
+
+		// convert bytes received to string for parsing
+		std::string command(buffer, received);
+
+		// temp debugging output
+		std::cout << "Received command: [" << command << "]" << std::endl;
+
+		// nix any trailing shit
+		while (!command.empty() &&
+			   (command.back() == '\n' ||
+			   command.back() == '\r' ||
+			   command.back() == ' ' ||
+			   command.back() == '\0'))
+		{
+			command.pop_back();
+		}
+
+		if (command == "1" || command == "line")
+			change_formation(LINE);
+		else if (command == "2" || command == "vee")
+			change_formation(FLYING_V);
+		else if (command == "3" || command == "circle")
+			change_formation(CIRCLE);
+		else if (command.rfind("move_leader", 0) == 0) {
+			std::stringstream ss(command);
+			std::string tag;
+			std::string dir;
+			ss >> tag >> dir;
+
+			double dx = 0.0;
+			double dy = 0.0;
+
+			if (dir == "north")
+				dy = -1.0;
+			else if (dir == "south")
+				dy = 1.0;
+			else if (dir == "east")
+				dx = 1.0;
+			else if (dir == "west")
+				dx = -1.0;
+
+			if (!swarm.empty()) {
+				double x = swarm[0].get_x() + dx;
+				double y = swarm[0].get_y() + dy;
+				double z = swarm[0].get_z();
+				swarm[0].set_position(x, y, z);
+			}
+		}
+
+		else if (command.rfind("altitude_change", 0) == 0) {
+			std::stringstream ss(command);
+			std::string tag;
+			double delta = 0.0;
+			ss >> tag >> delta;
+
+			if (!swarm.empty()) {
+				double x = swarm[0].get_x();
+				double y = swarm[0].get_y();
+				double z = swarm[0].get_z() + delta;
+				swarm[0].set_position(x, y, z);
+			}
+		}
+
 		memset(buffer, 0, 64);
 	}
-	close(socketfd);
 }
