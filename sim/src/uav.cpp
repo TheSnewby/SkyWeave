@@ -163,35 +163,75 @@ void UAV::uav_to_telemetry_server(int port = 6000) {
  * Return: cohesion force
  */
 std::array<double, 3> UAV::calculate_formation_force() {
-	std::vector<NeighborInfo> neighbors_status = get_neighbors_status();
-	int num_neighbors = neighbors_status.size();
-	double magnitude;
-	std::array<double, 3> leader_pos = neighbors_status[0].last_known_pos;
-	std::array<double, 3> leader_vel = neighbors_status[0].last_known_vel; // consider making sure the id = 0
+	std::vector<NeighborInfo> neighbors = get_neighbors_status();
+	int num_neighbors = neighbors.size();
+	std::array<double, 3> leader_pos = neighbors[0].last_known_pos;
+	std::array<double, 3> leader_vel = neighbors[0].last_known_vel;
+	int leader_id = -1;
+
+	for (const auto& n : neighbors) { // double check for the correct leader
+		if (n.id == 0) {
+			leader_pos = n.last_known_pos;
+			leader_vel = n.last_known_vel;
+			leader_id = 0;
+			break;
+		}
+	}
+	if (leader_id == -1)
+		std::cout << "ERROR: leader's id is: " << leader_id << "in uav.cpp calculate_formation_force()" << std::endl; // ensure leader id
+
 	std::array<double, 3> formation_offset = SwarmCoord.get_formation_offset(get_id());
 	std::array<double, 3> rotated_offset = SwarmCoord.rotate_offset_3d(formation_offset, leader_vel);
-	
-	// calculate target location within formation in relation to leader's location
+
+	// target location within formation in relation to leader's location
 	std::array<double, 3> formation_target = {
 		leader_pos[0] + rotated_offset[0],
 		leader_pos[1] + rotated_offset[1],
 		leader_pos[2] + rotated_offset[2]
 	};
 
-	// calculate the force direction
-	std::array<double, 3> formation_force = {
+	// position error
+	std::array<double, 3> formation_error = {
 		formation_target[0] - get_x(),
 		formation_target[1] - get_y(),
 		formation_target[2] - get_z()
 	};
 
-	// calculate the formation force
-	magnitude = sqrt((formation_force[0] * formation_force[0]) + (formation_force[1] * formation_force[1]) + (formation_force[2] * formation_force[2]));
-	formation_force[0] /= magnitude;
-	formation_force[1] /= magnitude;
-	formation_force[2] /= magnitude;
+	// formation control parameters
+	double formation_gain = 0.05; 		// proportional position gain (0.03 - 0.10 depending on under/overcorrecting)
+	double formation_force_cap = 1.0; 	// limit on output magnitude (0.5 - 2.0) - higher allows faster "catch-up"
 
-	return (formation_force);
+	// scale position error with proportional position gain
+	std::array<double, 3> formation_command = {
+		formation_gain * formation_error[0],
+		formation_gain * formation_error[1],
+		formation_gain * formation_error[2],
+	};
+
+	// if (get_id() == 1) {
+	// 	std::cout << "formation_offset : " << formation_offset[0]  << ", " << formation_offset[1]  << ", " << formation_offset[2] << std::endl;
+	// 	std::cout << "rotated_offset   : " << rotated_offset[0]    << ", " << rotated_offset[1]    << ", " << rotated_offset[2] << std::endl;
+	// 	std::cout << "formation_target : " << formation_target[0]  << ", " << formation_target[1]  << ", " << formation_target[2] << std::endl;
+	// 	std::cout << "formation_error  : " << formation_error[0]   << ", " << formation_error[1]   << ", " << formation_error[2] << std::endl;
+	// 	std::cout << "formation_command: " << formation_command[0] << ", " << formation_command[1] << ", " << formation_command[2] << std::endl;
+	// }
+
+	// compute magnitude and apply control parameters if necessary
+	double command_magnitude = sqrt(
+		(formation_command[0] * formation_command[0]) +
+		(formation_command[1] * formation_command[1]) +
+		(formation_command[2] * formation_command[2]));
+	if (command_magnitude > formation_force_cap) {
+		formation_command[0] *= formation_force_cap / command_magnitude;
+		formation_command[1] *= formation_force_cap / command_magnitude;
+		formation_command[2] *= formation_force_cap / command_magnitude;
+	}
+
+	// if (get_id() == 1) {
+	// 	std::cout << "formation_command: " << formation_command[0] << ", " << formation_command[1] << ", " << formation_command[2] << std::endl << std::endl;
+	// }
+
+	return (formation_command);
 }
 
 /**
@@ -206,15 +246,15 @@ std::array<double, 3> UAV::calculate_separation_forces() {
 	double repel_strength;
 	double normalized_separation_direction;
 	double epsilon = .001; // constant to reduce chance of division by zero
-	std::vector<NeighborInfo> neighbors_status = get_neighbors_status();
-	int num_neighbors = neighbors_status.size();
+	std::vector<NeighborInfo> neighbors = get_neighbors_status();
+	int num_neighbors = neighbors.size();
 	double min_separation = SwarmCoord.get_separation();
 
 	for (int i = 0; i < num_neighbors; i++) {
 		// calculate distance between uavs
-		distance_arr[0] = current_pos[0] - neighbors_status[i].last_known_pos[0];
-		distance_arr[1] = current_pos[1] - neighbors_status[i].last_known_pos[1];
-		distance_arr[2] = current_pos[2] - neighbors_status[i].last_known_pos[2];
+		distance_arr[0] = current_pos[0] - neighbors[i].last_known_pos[0];
+		distance_arr[1] = current_pos[1] - neighbors[i].last_known_pos[1];
+		distance_arr[2] = current_pos[2] - neighbors[i].last_known_pos[2];
 
 		normalized_separation_direction = sqrt((distance_arr[0] * distance_arr[0]) + (distance_arr[1] * distance_arr[1]) + (distance_arr[2] * distance_arr[2]));
 		// std::cout << "normalized_separation_direction: " << normalized_separation_direction << std::endl;
@@ -266,9 +306,9 @@ std::array<double, 3> UAV::calculate_alignment_forces() {
  * apply_boids_forces - applies boids forces to the heading and velocity of the uav
  */
 void UAV::apply_boids_forces() {
-	double internal_formation_weight = 2;
+	double internal_formation_weight = 1;
 	double internal_separation_weight = 2;
-	double internal_alignment_weight = 2;
+	double internal_alignment_weight = 0.3; // alignment is mostly redundant and may be fully phased out in the future
 	double cohesion_weight = SwarmCoord.get_cohesion();
 	double separation_weight = SwarmCoord.get_separation();
 	double alignment_weight = SwarmCoord.get_alignment();
@@ -280,11 +320,41 @@ void UAV::apply_boids_forces() {
 	std::array<double, 3> new_velocity;
 	std::array<double, 3> current_velocity = get_vel();
 
+	double fmag = sqrt(formation_force[0]*formation_force[0] +
+                   formation_force[1]*formation_force[1] +
+                   formation_force[2]*formation_force[2]);
+	double smag = sqrt(separation_force[0]*separation_force[0] +
+                   separation_force[1]*separation_force[1] +
+                   separation_force[2]*separation_force[2]);
+	double amag = sqrt(alignment_force[0]*alignment_force[0] +
+                   alignment_force[1]*alignment_force[1] +
+                   alignment_force[2]*alignment_force[2]);
+	// if (get_id() == 1)
+	// 	std::cout << "F="<<fmag<<" S="<<smag<<" A="<<amag<<std::endl;
+
+	std::array<double, 3> net_formation_force = {
+		(formation_force[0] * cohesion_weight * internal_formation_weight),
+		(formation_force[1] * cohesion_weight * internal_formation_weight),
+		(formation_force[2] * cohesion_weight * internal_formation_weight)
+	};
+
+	std::array<double, 3> net_separation_force = {
+		(separation_force[0] * separation_weight * internal_separation_weight),
+		(separation_force[1] * separation_weight * internal_separation_weight),
+		(separation_force[2] * separation_weight * internal_separation_weight) 
+	};
+
+	std::array<double, 3> net_alignment_force = {
+		(alignment_force[0] * alignment_weight * internal_alignment_weight),
+		(alignment_force[1] * alignment_weight * internal_alignment_weight),
+		(alignment_force[2] * alignment_weight * internal_alignment_weight)
+	};
+
 	net_force[0] = (formation_force[0] * cohesion_weight * internal_formation_weight) + (separation_force[0] * separation_weight * internal_separation_weight) + (alignment_force[0] * alignment_weight * internal_alignment_weight);
 	net_force[1] = (formation_force[1] * cohesion_weight * internal_formation_weight) + (separation_force[1] * separation_weight * internal_separation_weight) + (alignment_force[1] * alignment_weight * internal_alignment_weight);
 	net_force[2] = (formation_force[2] * cohesion_weight * internal_formation_weight) + (separation_force[2] * separation_weight * internal_separation_weight) + (alignment_force[2] * alignment_weight * internal_alignment_weight);
 
-	new_velocity[0] = current_velocity[0] + net_force[0] * UAVDT; //used to be ... + net_force[0] * UAVDT
+	new_velocity[0] = current_velocity[0] + net_force[0] * UAVDT;
 	new_velocity[1] = current_velocity[1] + net_force[1] * UAVDT;
 	new_velocity[2] = current_velocity[2] + net_force[2] * UAVDT;
 	// std::cout << get_id() << ": new vx " << new_velocity[0] << " = " << current_velocity[0] << " + " << net_force[0] << " * UAVDT(" << UAVDT << ")" <<std::endl;
@@ -300,12 +370,14 @@ void UAV::apply_boids_forces() {
 	// std::cout << "Actual new_velocity[2]: " << new_velocity[2] << std::endl;
 
 	// DEBUG PRINTOUT:
+
 	/*
 	std::cout << "UAV " << get_id() << " forces: "
-	<< "cohesion(" << cohesion_force[0] << "," << cohesion_force[1] << "," << cohesion_force[2] << ") "
-	<< "separation(" << separation_force[0] << "," << separation_force[1] << "," << separation_force[2] << ") "
-	<< "net(" << net_force[0] << "," << net_force[1] << "," << net_force[2] << ")"
-	<< "New Velocity: ()" << new_velocity[0] << ", " << new_velocity[1] << ", " << new_velocity[2] << ")" << std::endl;
+	<< "formation(" << net_formation_force[0] << "," << net_formation_force[1] << "," << net_formation_force[2] << ") "
+	<< "separation(" << net_separation_force[0] << "," << net_separation_force[1] << "," << net_separation_force[2] << ") "
+	<< "alignment(" << net_alignment_force[0] << "," << net_alignment_force[1] << "," << net_alignment_force[2] << ") "
+	<< "net(" << net_force[0] << "," << net_force[1] << "," << net_force[2] << ") "
+	<< "New Velocity(" << new_velocity[0] << ", " << new_velocity[1] << ", " << new_velocity[2] << ")" << std::endl;
 	// */
 	set_velocity(new_velocity[0], new_velocity[1], new_velocity[2]);
 }

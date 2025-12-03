@@ -18,7 +18,7 @@ private:
 public:
 	SwarmCoordinator() {
 		cohesion = 1.00;
-		separation = 12.00; // default spacing
+		separation = 10.00; // default spacing
 		alignment = 1.00;
 		max_speed = 30;
 		target_altitude = 150;
