@@ -31,9 +31,18 @@ export default function TelemetryPage() {
     separation: 1.0,
     alignment: 1.0,
     maxSpeed: 30,
-    targetAltitude: 150,
+    targetAltitude: 50,
   });
 
+  const leader = uavs.find((u) => u.id === 0);
+  const cameraTarget = leader
+  	? {
+		x: leader.position.x,
+		y: leader.position.y,
+		z: leader.position.z,
+	}
+	: { x: 0, y: 0, z: 0
+	}
   // sync local swarmSettings when server-sourced settings arrive over WebSocket
   useEffect(() => {
     if (!settings) return;

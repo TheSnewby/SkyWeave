@@ -49,8 +49,8 @@ void SwarmCoordinator::calculate_formation_offsets(int num_uavs, formation f) {
 					double angle = 2.0 * M_PI * (i - 1) / (num_uavs - 1);
 					formation_offsets[i] = {
 					radius * std::cos(angle),
-					0,
-					radius * std::sin(angle)
+					radius * std::sin(angle),
+					0
 					};
 				}
 			}

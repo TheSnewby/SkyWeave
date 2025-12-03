@@ -15,7 +15,7 @@ pub struct Position {
     pub y: f64,
     pub z: f64,
 }
-/// orientation in radians
+/// velocity in meters/second
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Velocity {
     pub vx: f64,
@@ -222,8 +222,8 @@ fn decode_frame(data: &[u8]) -> Result<UavState, serde_json::Error> {
 
     let position = Position {
         x: pos_obj.get("x").and_then(|v| v.as_f64()).unwrap_or(0.0),
-        y: pos_obj.get("z").and_then(|v| v.as_f64()).unwrap_or(0.0),
-        z: pos_obj.get("y").and_then(|v| v.as_f64()).unwrap_or(0.0),
+        y: pos_obj.get("y").and_then(|v| v.as_f64()).unwrap_or(0.0),
+        z: pos_obj.get("z").and_then(|v| v.as_f64()).unwrap_or(0.0),
     };
 
     let velocity = Velocity {
