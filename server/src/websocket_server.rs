@@ -74,9 +74,9 @@ async fn ws_handler(
 
 async fn send_formation_command_to_sim(formation: &str) {
     let msg = match formation {
-        "line" => Some("LINE"),
-        "vee" => Some("VEE"),
-        "circle" => Some("CIRCLE"),
+        "line" => Some("line"),
+        "vee" => Some("vee"),
+        "circle" => Some("circle"),
         _ => None,
     };
 
