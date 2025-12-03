@@ -19,7 +19,7 @@
 #include <algorithm>
 #include "swarm_coordinator.h"
 
-#define UAVDT .025 // UAV time step
+#define UAVDT .05 // UAV time step
 
 // for the stretch goal of allowing a user to manually control an individual UAV
 enum class UAVControleMode {
