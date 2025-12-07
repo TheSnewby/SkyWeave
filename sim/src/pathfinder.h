@@ -5,9 +5,10 @@
 
 class Pathfinder {
 private:
-	Environment & env;
+	Environment& env;
 	int nx, ny, nz;
 	double res;
+	double epsilon = 1e-3;	//for simplifying actions
 
 public:
 	struct Node {
@@ -21,8 +22,16 @@ public:
 		}
 	};
 
+	std::vector<std::array<double, 3>> plan(
+		const std::array<double, 3>& worldStart,
+		const std::array<double, 3>& worldGoal
+	);
+
 	// Constructor
 	Pathfinder(Environment& e) : env(e), nx(e.getNx()), ny(e.getNy()), nz(e.getNz()), res(e.getResolution()) {}
+
+	// setter
+	void setEpsilon(double epsilon_) { epsilon = epsilon_; }
 
 private:
 	// The 6 neighbor offsets of a cell (might expand to the 26)
@@ -37,5 +46,9 @@ private:
 	}
 	inline std::array<int, 3> toIJK(int idx) const;
 	double heuristic(int idx_a, int idx_b) const;
-	std::vector<std::array<double, 3>> findPath (std::array<double, 3> worldStart, std::array<double, 3> worldGoal);
+	std::vector<int> rawAStar(std::array<double, 3> worldStart, std::array<double, 3> worldGoal);
+	std::vector<std::array<double, 3>> smoothPath(const std::vector<int>& raw);
+
+	void print_idx_path(std::vector<int> path);
+	void print_xyz_path(std::vector<std::array<double, 3>> path);
 };

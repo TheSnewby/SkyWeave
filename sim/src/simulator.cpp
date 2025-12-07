@@ -57,6 +57,14 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	env.addBox(40, 220, 20, 70, 240, 60);
 	env.addSphere({-20, 150, 30}, 10.0);
 	env.environment_to_rust(command_port);
+
+	Pathfinder pathfinder(env);
+	std::array<double, 3> startXYZ = swarm[0].get_pos();
+	std::array<double, 3> goalXYZ  = {100, 300, 300};		// make argv?
+	std::vector<std::array<double, 3>> path = pathfinder.plan(startXYZ, goalXYZ);
+
+	// Pathfollower pathfollower(swarm[0], env.getResolution());
+	// pathfollower.run();
 };
 
 /**
