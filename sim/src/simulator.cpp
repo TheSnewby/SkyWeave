@@ -54,9 +54,7 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	print_swarm_status();
 
 	// Set Up Environment
-	env.addCylinder({0, 100, 0}, 15.0, 60.0);
-	env.addBox(40, 220, 20, 70, 240, 60);
-	env.addSphere({-20, 150, 30}, 10.0);
+	env.generate_random_obstacles(20);
 	env.environment_to_rust(RUST_UDP_PORT);
 
 	Pathfinder pathfinder(env);

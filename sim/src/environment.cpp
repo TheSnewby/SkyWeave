@@ -1,38 +1,51 @@
 #include "environment.h"
+
 using json = nlohmann::json;
 
-struct Cylinder {
+struct Cylinder
+{
 	double x, y, z, radius, height;
 };
-struct Box {
+struct Box
+{
 	double x, y, z, width, depth, height;
 };
-struct Sphere {
+struct Sphere
+{
 	double x, y, z, radius;
 };
 
-void to_json(json& j, Cylinder const& c) {
+void to_json(json &j, Cylinder const &c)
+{
 	j = {
 		{"type", "cylinder"},
-		{"x", c.x}, {"y", c.y}, {"z", c.z},
-		{"radius", c.radius}, {"height", c.height}
-	};
+		{"x", c.x},
+		{"y", c.y},
+		{"z", c.z},
+		{"radius", c.radius},
+		{"height", c.height}};
 }
 
-void to_json(json& j, Box const& b) {
+void to_json(json &j, Box const &b)
+{
 	j = {
 		{"type", "box"},
-		{"x", b.x}, {"y", b.y}, {"z", b.z},
-		{"width", b.width}, {"depth", b.depth}, {"height", b.height}
-	};
+		{"x", b.x},
+		{"y", b.y},
+		{"z", b.z},
+		{"width", b.width},
+		{"depth", b.depth},
+		{"height", b.height}};
 }
 
-void to_json(json& j, Sphere const& s) {
+void to_json(json &j, Sphere const &s)
+{
 	j = {
 		{"type", "sphere"},
-		{"x", s.x}, {"y", s.y}, {"z", s.z},
-		{"radius", s.radius}
-	};
+		{"x", s.x},
+		{"y", s.y},
+		{"z", s.z},
+		{"radius", s.radius}};
 }
 
 /**
@@ -43,7 +56,8 @@ void to_json(json& j, Sphere const& s) {
  *
  * Return: 1 if in bounds, 0 otherwise
  */
-bool Environment::inBounds (int i, int j, int k) const {
+bool Environment::inBounds(int i, int j, int k) const
+{
 	return (i >= 0 && i < nx && j >= 0 && j < ny && k >= 0 && k < nz);
 };
 
@@ -54,7 +68,8 @@ bool Environment::inBounds (int i, int j, int k) const {
  * @k: z-value
  * @blocked: 1 if blocked, 0 otherwise
  */
-void Environment::setBlock(int i, int j, int k, bool blocked) {
+void Environment::setBlock(int i, int j, int k, bool blocked)
+{
 	occupancy[idx(i, j, k)] = blocked;
 }
 
@@ -66,7 +81,8 @@ void Environment::setBlock(int i, int j, int k, bool blocked) {
  *
  * Return: 1 if in bounds, 0 otherwise
  */
-bool Environment::isBlocked (int i, int j, int k) const {
+bool Environment::isBlocked(int i, int j, int k) const
+{
 	if (inBounds(i, j, k))
 		return (occupancy[idx(i, j, k)]);
 	else
@@ -79,7 +95,8 @@ bool Environment::isBlocked (int i, int j, int k) const {
  *
  * Return: 3d coords in grid space
  */
-std::array<int, 3> Environment::toGrid(const std::array<double, 3>& point) const {
+std::array<int, 3> Environment::toGrid(const std::array<double, 3> &point) const
+{
 	double x = (point[0] - origin[0]) / resolution;
 	double y = (point[1] - origin[1]) / resolution;
 	double z = (point[2] - origin[2]) / resolution;
@@ -97,7 +114,8 @@ std::array<int, 3> Environment::toGrid(const std::array<double, 3>& point) const
  *
  * Return: 3d coords in world space
  */
-std::array<double, 3> Environment::toWorld(int i, int j, int k) const {
+std::array<double, 3> Environment::toWorld(int i, int j, int k) const
+{
 	double x = origin[0] + (i + 0.5) * resolution;
 	double y = origin[1] + (j + 0.5) * resolution;
 	double z = origin[2] + (k + 0.5) * resolution;
@@ -107,24 +125,25 @@ std::array<double, 3> Environment::toWorld(int i, int j, int k) const {
 
 /**
  * addBox - creates a box in grid space and sets it as blocked using world space coords
- * @x0: initial x corner 
+ * @x0: initial x corner
  * @y0: initial y corner
  * @z0: initial z corner
  * @x1: final x corner
  * @y1: final y corner
  * @z1: final z corner
  */
-void Environment::addBox(double x0, double y0, double z0, double x1, double y1, double z1) {
+void Environment::addBox(double x0, double y0, double z0, double x1, double y1, double z1)
+{
 	std::array<int, 3> g0 = toGrid({x0, y0, z0});
 	std::array<int, 3> g1 = toGrid({x1, y1, z1});
 
 	// place in valid index range
-	int i0 = std::max(0, std::min(nx-1, std::min(g0[0], g1[0])));
-	int i1 = std::max(0, std::min(nx-1, std::max(g0[0], g1[0])));
-	int j0 = std::max(0, std::min(ny-1, std::min(g0[1], g1[1])));
-	int j1 = std::max(0, std::min(ny-1, std::max(g0[1], g1[1])));
-	int k0 = std::max(0, std::min(nz-1, std::min(g0[2], g1[2])));
-	int k1 = std::max(0, std::min(nz-1, std::max(g0[2], g1[2])));
+	int i0 = std::max(0, std::min(nx - 1, std::min(g0[0], g1[0])));
+	int i1 = std::max(0, std::min(nx - 1, std::max(g0[0], g1[0])));
+	int j0 = std::max(0, std::min(ny - 1, std::min(g0[1], g1[1])));
+	int j1 = std::max(0, std::min(ny - 1, std::max(g0[1], g1[1])));
+	int k0 = std::max(0, std::min(nz - 1, std::min(g0[2], g1[2])));
+	int k1 = std::max(0, std::min(nz - 1, std::max(g0[2], g1[2])));
 
 	// mark
 	for (int k = k0; k <= k1; k++)
@@ -141,24 +160,31 @@ void Environment::addBox(double x0, double y0, double z0, double x1, double y1, 
  * @center: center of sphere
  * @radius: radius of sphere
  */
-void Environment::addSphere(const std::array<double, 3>& center, double radius) {
+void Environment::addSphere(const std::array<double, 3> &center, double radius)
+{
 	std::array<int, 3> gc = toGrid(center);
 	int r = int(ceil(radius / resolution));
 
 	// iterate layers
-	for (int k = gc[2] - r; k <= gc[2] + r; ++k) {
-		if (k < 0 || k >= nz) continue;
-		for (int j = gc[1] - r; j <= gc[1] + r; ++j) {
-		if (j < 0 || j >= ny) continue;
-		for (int i = gc[0] - r; i <= gc[0] + r; ++i) {
-			if (i < 0 || i >= nx) continue;
-			auto wc = toWorld(i, j, k);
-			double dx = wc[0] - center[0];
-			double dy = wc[1] - center[1];
-			double dz = wc[2] - center[2];
-			if (dx * dx + dy * dy + dz * dz <= radius * radius)
-			setBlock(i, j, k, true);
-		}
+	for (int k = gc[2] - r; k <= gc[2] + r; ++k)
+	{
+		if (k < 0 || k >= nz)
+			continue;
+		for (int j = gc[1] - r; j <= gc[1] + r; ++j)
+		{
+			if (j < 0 || j >= ny)
+				continue;
+			for (int i = gc[0] - r; i <= gc[0] + r; ++i)
+			{
+				if (i < 0 || i >= nx)
+					continue;
+				auto wc = toWorld(i, j, k);
+				double dx = wc[0] - center[0];
+				double dy = wc[1] - center[1];
+				double dz = wc[2] - center[2];
+				if (dx * dx + dy * dy + dz * dz <= radius * radius)
+					setBlock(i, j, k, true);
+			}
 		}
 	}
 
@@ -172,7 +198,8 @@ void Environment::addSphere(const std::array<double, 3>& center, double radius) 
  * @radius: radius of cylinder
  * @height: height of cylinder
  */
-void Environment::addCylinder(const std::array<double,3>& center, double radius, double height) {
+void Environment::addCylinder(const std::array<double, 3> &center, double radius, double height)
+{
 	std::array<int, 3> gc = toGrid(center);
 
 	int r_cell = int(ceil(radius / resolution));
@@ -181,7 +208,8 @@ void Environment::addCylinder(const std::array<double,3>& center, double radius,
 	double r_sq = radius * radius;
 	double half_h = height / 2.0;
 
-	for (int k = gc[2] - h_cell; k <= gc[2] + h_cell; k++) {
+	for (int k = gc[2] - h_cell; k <= gc[2] + h_cell; k++)
+	{
 		if (k <= 0 || k >= nz)
 			continue;
 		// world Z-value of this layer's center
@@ -190,14 +218,16 @@ void Environment::addCylinder(const std::array<double,3>& center, double radius,
 		if (std::fabs(dz) > half_h)
 			continue;
 
-		for (int j = gc[1] - r_cell; j <= gc[1] + r_cell; j++) {
+		for (int j = gc[1] - r_cell; j <= gc[1] + r_cell; j++)
+		{
 			if (j < 0 || j > ny)
 				continue;
 			// world Y-value of row's center
 			double wy = origin[1] + (j + 0.5) * resolution;
 			double dy = wy - center[1];
 
-			for (int i = gc[0] - r_cell; i <= gc[0] + r_cell; i++) {
+			for (int i = gc[0] - r_cell; i <= gc[0] + r_cell; i++)
+			{
 				if (i < 0 || i >= nx)
 					continue;
 				// world X-value of column's center
@@ -215,10 +245,96 @@ void Environment::addCylinder(const std::array<double,3>& center, double radius,
 	msg["obstacles"].push_back(c);
 }
 
+void Environment::generate_random_obstacles(int count)
+{
+	if (count <= 0)
+		return;
+
+	// reset JSON obstacle list; grid will be updated by addBox/addSphere/addCylinder
+	msg["obstacles"] = json::array();
+
+	// RNG setup for random obstacle generation
+	std::mt19937 rng(std::random_device{}());
+
+	int max_ix = std::max(0, nx - 1);
+	int max_iy = std::max(0, ny - 1);
+
+	std::uniform_int_distribution<int> ix_dist(0, max_ix);
+	std::uniform_int_distribution<int> iy_dist(0, max_iy);
+	std::uniform_int_distribution<int> type_dist(0, 2); // 0=cylinder, 1=box, 2=sphere
+
+	// size distributions in meters
+	std::uniform_real_distribution<double> radius_dist(10.0, 30.0);
+	std::uniform_real_distribution<double> height_dist(40.0, 90.0);
+	std::uniform_real_distribution<double> box_size_dist(20.0, 60.0);
+
+	// base altitude for obstacles (the grid's ground level)
+	double base_z = origin[2];
+
+	for (int n = 0; n < count; ++n)
+	{
+		int i = ix_dist(rng);
+		int j = iy_dist(rng);
+
+		// get world coordinates of grid cell center
+		auto wc = toWorld(i, j, 0);
+		double cx = wc[0];
+		double cy = wc[1];
+
+		int t = type_dist(rng);
+
+		if (t == 0)
+		{
+			// cylinder: rests on the grid
+			double radius = radius_dist(rng);
+			double height = height_dist(rng);
+			double center_z = base_z + height / 2.0;
+			std::array<double, 3> center{cx, cy, center_z};
+			addCylinder(center, radius, height);
+		}
+		else if (t == 1)
+		{
+			// box: also on grid
+			double width = box_size_dist(rng);
+			double depth = box_size_dist(rng);
+			double height = height_dist(rng);
+
+			double x0 = cx - width / 2.0;
+			double x1 = cx + width / 2.0;
+			double y0 = cy - depth / 2.0;
+			double y1 = cy + depth / 2.0;
+			double z0 = base_z;
+			double z1 = base_z + height;
+
+			addBox(x0, y0, z0, x1, y1, z1);
+		}
+		else
+		{
+			// sphere: generated between grid level and 200m ceiling
+			double radius = radius_dist(rng);
+
+			// keep bottom of sphere above grid level and top below 200m
+			double min_center_z = base_z + radius;		   // just touching the grid
+			double max_center_z = base_z + 200.0 - radius; // just below 200m
+
+			double center_z = min_center_z;
+			if (max_center_z > min_center_z)
+			{
+				std::uniform_real_distribution<double> center_dist(min_center_z, max_center_z);
+				center_z = center_dist(rng);
+			}
+
+			std::array<double, 3> center{cx, cy, center_z};
+			addSphere(center, radius);
+		}
+	}
+}
+
 /**
  * environment_to_rust - sends environment json str to rust server
  */
-int Environment::environment_to_rust(int port) {
+int Environment::environment_to_rust(int port)
+{
 	int socketfd;
 	ssize_t sendto_return = 0, json_size;
 	struct sockaddr_in addr;

@@ -38,6 +38,7 @@ export default function UavScene({
 	obstacles = [],
 }: Props) {
 	const scale = 0.1; // shrinks world into view
+	const obstacleVisualScale = 3.0; // make obstacles chonkier
 
 	const trailsRef = useRef<Map<number, [number, number, number][]>>(new Map());
 
@@ -63,6 +64,10 @@ export default function UavScene({
 
 	return (
 		<div className="w-full h-96 mc-panel mc-panel-inner overflow-hidden relative bg-gradient-to-b from-black/80 to-black/95 border border-emerald-700/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+			{/* HUD: obstacle count */}
+			<div className="absolute bottom-2 left-3 z-20 nasa-text text-[0.65rem] text-emerald-300 bg-black/60 px-2 py-1 rounded">
+				Obstacle Count: {obstacles.length}
+			</div>
 			{!leader && (
 				<div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
 					<div className="mc-panel-inner nasa-text text-xs tracking-widest text-emerald-300 bg-black/60 px-4 py-2 rounded">
@@ -139,8 +144,12 @@ export default function UavScene({
 
 					{/* server-synced obstacles */}
 					{obstacles.map((obs, idx) => {
+						// base altitude from sim (z), then lift by half-height / radius
 						if (obs.type === "cylinder") {
-							const centerY = obs.z * scale;
+							const baseAltitude = obs.z * scale;
+							const visualHeight = obs.height * scale * obstacleVisualScale;
+							const centerY = baseAltitude + visualHeight / 2; // base on grid
+
 							return (
 								<group
 									key={`obs-${idx}`}
@@ -149,9 +158,9 @@ export default function UavScene({
 									<mesh>
 										<cylinderGeometry
 											args={[
-												obs.radius * scale,
-												obs.radius * scale,
-												obs.height * scale,
+												obs.radius * scale * obstacleVisualScale,
+												obs.radius * scale * obstacleVisualScale,
+												visualHeight,
 												24,
 											]}
 										/>
@@ -167,7 +176,10 @@ export default function UavScene({
 						}
 
 						if (obs.type === "box") {
-							const centerY = obs.z * scale;
+							const baseAltitude = obs.z * scale;
+							const visualHeight = obs.height * scale * obstacleVisualScale;
+							const centerY = baseAltitude + visualHeight / 2;
+
 							return (
 								<group
 									key={`obs-${idx}`}
@@ -176,9 +188,9 @@ export default function UavScene({
 									<mesh>
 										<boxGeometry
 											args={[
-												obs.width * scale,
-												obs.height * scale,
-												obs.depth * scale,
+												obs.width * scale * obstacleVisualScale,
+												visualHeight,
+												obs.depth * scale * obstacleVisualScale,
 											]}
 										/>
 										<meshBasicMaterial
@@ -193,16 +205,17 @@ export default function UavScene({
 						}
 
 						if (obs.type === "sphere") {
-							const centerY = obs.z * scale;
+							const baseAltitude = obs.z * scale;
+							const visualRadius = obs.radius * scale * obstacleVisualScale;
+							const centerY = baseAltitude + visualRadius; // rest on grid
+
 							return (
 								<group
 									key={`obs-${idx}`}
 									position={[obs.x * scale, centerY, obs.y * scale]}
 								>
 									<mesh>
-										<sphereGeometry
-											args={[obs.radius * scale, 24, 24]}
-										/>
+										<sphereGeometry args={[visualRadius, 24, 24]} />
 										<meshBasicMaterial
 											color="#00ff00"
 											wireframe
