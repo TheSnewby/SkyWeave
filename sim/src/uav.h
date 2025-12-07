@@ -21,6 +21,8 @@
 
 #define UAVDT .05 // UAV time step
 
+class SwarmCoordinator; // forward declaration to avoid circular header dependencies
+
 // for the stretch goal of allowing a user to manually control an individual UAV
 enum class UAVControleMode {
 	AUTONOMOUS,

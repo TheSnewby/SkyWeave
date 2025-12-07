@@ -5,6 +5,8 @@
 #include <cmath>
 #include <thread>
 
+class UAV; // forward declaration to avoid circular header dependencies
+
 class Pathfollower {
 private:
 	UAV& leader;
