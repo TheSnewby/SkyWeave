@@ -164,11 +164,13 @@ export default function UavScene({
 												24,
 											]}
 										/>
-										<meshBasicMaterial
+										<meshStandardMaterial
 											color="#00ff00"
+											emissive="#00ff00"
+											emissiveIntensity={1.5}
 											wireframe
 											transparent
-											opacity={0.4}
+											opacity={0.75}
 										/>
 									</mesh>
 								</group>
@@ -193,11 +195,13 @@ export default function UavScene({
 												obs.depth * scale * obstacleVisualScale,
 											]}
 										/>
-										<meshBasicMaterial
+										<meshStandardMaterial
 											color="#00ff00"
+											emissive="#00ff00"
+											emissiveIntensity={1.5}
 											wireframe
 											transparent
-											opacity={0.4}
+											opacity={0.75}
 										/>
 									</mesh>
 								</group>
@@ -216,11 +220,13 @@ export default function UavScene({
 								>
 									<mesh>
 										<sphereGeometry args={[visualRadius, 24, 24]} />
-										<meshBasicMaterial
+										<meshStandardMaterial
 											color="#00ff00"
+											emissive="#00ff00"
+											emissiveIntensity={1.5}
 											wireframe
 											transparent
-											opacity={0.4}
+											opacity={0.75}
 										/>
 									</mesh>
 								</group>
