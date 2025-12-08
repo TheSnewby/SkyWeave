@@ -24,7 +24,28 @@ function connectWs() {
 	});
 
 	ws.on("message", (data) => {
-		console.log("WS message from server:", data.toString());
+		const text = data.toString();
+		console.log("WS message from server:", text);
+
+		let msg;
+		try {
+			msg = JSON.parse(text);
+		} catch (e) {
+			// non-JSON or irrelevant messages are just logged and ignored
+			return;
+		}
+
+		// Forward swarm_settings messages from server back to the sim via UDP
+		if (msg.type === "swarm_settings") {
+			const buf = Buffer.from(JSON.stringify(msg), "utf8");
+			udp.send(buf, UDP_PORT, "127.0.0.1", (err) => {
+				if (err) {
+					console.error("Error sending swarm_settings to sim via UDP:", err.message);
+				} else {
+					console.log("Forwarded swarm_settings to sim via UDP:", msg);
+				}
+			});
+		}
 	});
 }
 
