@@ -32,8 +32,8 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	// create base UAVs
 	for (int i = 0; i < num_uavs; i++)
 	{
-		swarm.push_back(UAV(i, 8000 + i, 0.0, 0.0, 20.0));
-		swarm[i].set_velocity(0.0, 2.0, 0.0); // cruisin on y axis
+		swarm.push_back(UAV(i, 8000 + i, 0.0, 0.0, 50.0));
+		swarm[i].set_velocity(0.0, 1.0, 0.0); // cruisin on y axis
 	}
 
 	// set initial formation (LINE as default)
@@ -54,7 +54,7 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	print_swarm_status();
 
 	// Set Up Environment
-	env.generate_random_obstacles(20);
+	env.generate_random_obstacles(40);
 	env.environment_to_rust(RUST_UDP_PORT);
 
 	Pathfinder pathfinder(env);
@@ -514,12 +514,12 @@ void UAVSimulator::command_listener_loop()
 			else if (dir == "left")
 			{
 				const double delta_angle = M_PI / 36; // 5 degrees
-				heading += delta_angle;
+				heading -= delta_angle;
 			}
 			else if (dir == "right")
 			{
 				const double delta_angle = M_PI / 36; // 5 degrees
-				heading -= delta_angle;
+				heading += delta_angle;
 			}
 
 			// compute new velocity components
