@@ -279,6 +279,18 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                                                         }
                                                     }
 
+                                                    // flight mode toggle: autonomous vs controlled
+                                                    "flight_mode" => {
+                                                        if let Some(mode) = cmd.get("mode").and_then(|v| v.as_str()) {
+                                                            tracing::info!("flight_mode command from UI: {}", mode);
+                                                            // Forward the entire JSON command into the shared swarm model
+                                                            // so the backend/sim can interpret and enforce the mode.
+                                                            shared.swarm.apply_command(cmd.clone()).await;
+                                                        } else {
+                                                            tracing::warn!("flight_mode command missing `mode` field: {:?}", cmd);
+                                                        }
+                                                    }
+
                                                     // anything else: apply locally
                                                     _ => {
                                                         shared.swarm.apply_command(cmd).await;

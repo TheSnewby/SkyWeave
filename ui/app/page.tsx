@@ -22,7 +22,7 @@ import SwarmControls, { SwarmSettings } from "./components/SwarmControls";
 import CommandPanel, { Command } from "./components/CommandPanel";
 
 export default function TelemetryPage() {
-	const { uavs, status, settings, obstacles, send } = useTelemetry();
+	const { uavs, status, obstacles, send } = useTelemetry();
 	const router = useRouter();
 	const [showSplash, setShowSplash] = useState(true);
 	const [showTrails, setShowTrails] = useState(true);
@@ -48,20 +48,6 @@ export default function TelemetryPage() {
 			z: 0,
 		};
 
-	// sync local swarmSettings when server-sourced settings arrive over WebSocket
-	useEffect(() => {
-		if (!settings) return;
-
-		setSwarmSettings((prev) => ({
-			cohesion: settings.cohesion ?? prev.cohesion,
-			separation: settings.separation ?? prev.separation,
-			alignment: settings.alignment ?? prev.alignment,
-			maxSpeed: settings.max_speed ?? settings.maxSpeed ?? prev.maxSpeed,
-			targetAltitude:
-				settings.target_altitude ?? settings.targetAltitude ?? prev.targetAltitude,
-		}));
-	}, [settings]);
-
 	const handleCommand = (cmd: Command) => {
 		// track current formation mode for HUD if this is a formation command
 		if (cmd.type === "formation" && "mode" in cmd && typeof cmd.mode === "string") {
@@ -70,11 +56,6 @@ export default function TelemetryPage() {
 		// send command over the telemetry WebSocket to the Rust backend
 		send({ type: "command", payload: cmd });
 	};
-
-	useEffect(() => {
-		// broadcast swarm behavior settings to the backend via WebSocket
-		send({ type: "swarm_settings", payload: swarmSettings });
-	}, [swarmSettings, send]);
 
 	// keyboard controls: WASD to move leader, Q/E altitude, T toggle trails
 	useEffect(() => {
