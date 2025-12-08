@@ -150,6 +150,10 @@ void UAVTelemetryServer::update_json_pkg(const char *json_str, const struct sock
 				{
 					tuning.max_speed = p["maxSpeed"].get<double>();
 				}
+				if (p.contains("targetAltitude") && p["targetAltitude"].is_number())
+				{
+					tuning.target_altitude = p["targetAltitude"].get<double>();
+				}
 
 				set_swarm_tuning(tuning);
 
@@ -158,6 +162,7 @@ void UAVTelemetryServer::update_json_pkg(const char *json_str, const struct sock
 						  << " separation=" << tuning.separation
 						  << " alignment=" << tuning.alignment
 						  << " max_speed=" << tuning.max_speed
+						  << " target_altitude=" << tuning.target_altitude
 						  << std::endl;
 
 				/* Control message handled; no need to treat as telemetry */

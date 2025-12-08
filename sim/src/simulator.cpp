@@ -32,7 +32,7 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	// create base UAVs
 	for (int i = 0; i < num_uavs; i++)
 	{
-		swarm.push_back(UAV(i, 8000 + i, 0.0, 0.0, 50.0));
+		swarm.push_back(UAV(i, 8000 + i, 0.0, 0.0, 20.0));
 		swarm[i].set_velocity(0.0, 2.0, 0.0); // cruisin on y axis
 	}
 

@@ -319,6 +319,7 @@ void UAV::apply_boids_forces()
 	double separation_weight = tuning.separation;
 	double alignment_weight = tuning.alignment;
 	double max_speed = tuning.max_speed;
+	double target_altitude = tuning.target_altitude;
 
 	std::array<double, 3> formation_force = calculate_formation_force();
 	std::array<double, 3> separation_force = calculate_separation_forces();
@@ -356,7 +357,16 @@ void UAV::apply_boids_forces()
 
 	net_force[0] = (formation_force[0] * cohesion_weight * internal_formation_weight) + (separation_force[0] * separation_weight * internal_separation_weight) + (alignment_force[0] * alignment_weight * internal_alignment_weight);
 	net_force[1] = (formation_force[1] * cohesion_weight * internal_formation_weight) + (separation_force[1] * separation_weight * internal_separation_weight) + (alignment_force[1] * alignment_weight * internal_alignment_weight);
-	net_force[2] = (formation_force[2] * cohesion_weight * internal_formation_weight) + (separation_force[2] * separation_weight * internal_separation_weight) + (alignment_force[2] * alignment_weight * internal_alignment_weight);
+
+	// Altitude control: gently push Z toward target_altitude
+	double altitude_error = target_altitude - get_z();
+	double altitude_gain = 0.05; // tune this to make response snappier or smoother
+	double altitude_force = altitude_gain * altitude_error;
+
+	net_force[2] = (formation_force[2] * cohesion_weight * internal_formation_weight) +
+				   (separation_force[2] * separation_weight * internal_separation_weight) +
+				   (alignment_force[2] * alignment_weight * internal_alignment_weight) +
+				   altitude_force;
 
 	new_velocity[0] = current_velocity[0] + net_force[0] * UAVDT;
 	new_velocity[1] = current_velocity[1] + net_force[1] * UAVDT;
