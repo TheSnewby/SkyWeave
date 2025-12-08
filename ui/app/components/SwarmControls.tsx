@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTelemetry } from "../hooks/useTelemetry";
 
 export type SwarmSettings = {
 	cohesion: number; // how strongly UAVs pull toward group center
@@ -24,8 +25,23 @@ type SwarmControlsProps = {
  * - sliders update in real-time and send changes upstream
  */
 export default function SwarmControls({ settings, onChange }: SwarmControlsProps) {
+	const { sendUiCommand } = useTelemetry();
+
 	const updateField = (field: keyof SwarmSettings, value: number) => {
-		onChange({ ...settings, [field]: value });
+		const next: SwarmSettings = { ...settings, [field]: value } as SwarmSettings;
+		onChange(next);
+
+		// push updated swarm settings to backend via WebSocket
+		sendUiCommand({
+			type: "swarm_settings",
+			payload: {
+				cohesion: next.cohesion,
+				separation: next.separation,
+				alignment: next.alignment,
+				maxSpeed: next.maxSpeed,
+				targetAltitude: next.targetAltitude,
+			},
+		});
 	};
 
 	return (
@@ -53,8 +69,8 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 				<ControlRow
 					label="SEPARATION"
 					min={0}
-					max={2}
-					step={0.05}
+					max={20}
+					step={0.1}
 					value={settings.separation}
 					onChange={(v) => updateField("separation", v)}
 				/>
@@ -75,7 +91,7 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 				<ControlRow
 					label="MAX SPEED (m/s)"
 					min={0}
-					max={60}
+					max={5}
 					step={1}
 					value={settings.maxSpeed}
 					onChange={(v) => updateField("maxSpeed", v)}

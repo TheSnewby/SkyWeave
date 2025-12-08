@@ -52,12 +52,26 @@ export type ObstacleType =
 		radius: number;
 	};
 
+export type SwarmSettingsPayload = {
+	cohesion: number;
+	separation: number;
+	alignment: number;
+	maxSpeed: number;
+	targetAltitude: number;
+};
+
+export type UiCommand =
+	| { type: "swarm_settings"; payload: SwarmSettingsPayload }
+	| { type: "formation"; mode: string }
+	| { type: "rtb" };
+
 type TelemetryState = {
 	uavs: UavState[];
 	status: ConnectionStatus;
 	settings: any | null;
 	obstacles: ObstacleType[];
 	send: (message: unknown) => void;
+	sendUiCommand: (cmd: UiCommand) => void;
 };
 
 const isUavState = (data: any): data is UavState => {
@@ -130,6 +144,13 @@ export function useTelemetry(): TelemetryState {
 			}
 		},
 		[]
+	);
+
+	const sendUiCommand = useCallback(
+		(cmd: UiCommand) => {
+			send(cmd);
+		},
+		[send]
 	);
 
 	useEffect(() => {
@@ -250,5 +271,5 @@ export function useTelemetry(): TelemetryState {
 		);
 	}, [uavs]);
 
-	return { uavs, status, settings, obstacles, send };
+	return { uavs, status, settings, obstacles, send, sendUiCommand };
 }
