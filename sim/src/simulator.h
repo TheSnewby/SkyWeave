@@ -12,7 +12,7 @@
 #include <algorithm>
 #include "environment.h"
 #include "pathfinder.h"
-#include "path_follower.h"
+#include "pathfollower.h"
 
 class UAVTelemetryServer;
 
