@@ -25,10 +25,13 @@ void UAV::update_neighbor_status(int neighbor_id, const std::array<double, 3> &p
 		if (neighbor.id == neighbor_id)
 		{
 			neighbor.last_known_pos = pos;
+			neighbor.last_known_vel = vel; // keep velocity in sync too
 			neighbor.last_time = now;
 			return;
 		}
 	}
+
+	// New neighbor: store both position and velocity
 	neighbors_status.push_back({neighbor_id, pos, vel, now});
 }
 
@@ -160,29 +163,72 @@ void UAV::uav_to_telemetry_server(int port = 6000)
  */
 std::array<double, 3> UAV::calculate_formation_force()
 {
+	// If we have no neighbor information, we cannot compute a meaningful formation force
 	std::vector<NeighborInfo> neighbors = get_neighbors_status();
-	int num_neighbors = neighbors.size();
+	if (neighbors.empty())
+	{
+		return {0.0, 0.0, 0.0};
+	}
+
+	// Find the leader (id == 0) from neighbor info; fall back to the first neighbor if needed
 	std::array<double, 3> leader_pos = neighbors[0].last_known_pos;
 	std::array<double, 3> leader_vel = neighbors[0].last_known_vel;
-	int leader_id = -1;
+	bool leader_found = false;
 
 	for (const auto &n : neighbors)
-	{ // double check for the correct leader
+	{
 		if (n.id == 0)
 		{
 			leader_pos = n.last_known_pos;
 			leader_vel = n.last_known_vel;
-			leader_id = 0;
+			leader_found = true;
 			break;
 		}
 	}
-	if (leader_id == -1)
-		std::cout << "ERROR: leader's id is: " << leader_id << "in uav.cpp calculate_formation_force()" << std::endl; // ensure leader id
 
+	if (!leader_found)
+	{
+		std::cout << "WARN: leader (id 0) not found in neighbors in calculate_formation_force()" << std::endl;
+	}
+
+	// Normalize leader velocity to get a clean heading vector for rotation
+	double speed = std::sqrt(
+		leader_vel[0] * leader_vel[0] +
+		leader_vel[1] * leader_vel[1] +
+		leader_vel[2] * leader_vel[2]);
+
+	if (speed < 1e-6)
+	{
+		// If the leader is effectively stationary, assume a default heading along +Y
+		leader_vel = {0.0, 1.0, 0.0};
+	}
+	else
+	{
+		leader_vel[0] /= speed;
+		leader_vel[1] /= speed;
+		leader_vel[2] /= speed;
+	}
+
+	// Local formation offset for this UAV (defined by the formation type: LINE, VEE, CIRCLE)
 	std::array<double, 3> formation_offset = SwarmCoord.get_formation_offset(get_id());
-	std::array<double, 3> rotated_offset = SwarmCoord.rotate_offset_3d(formation_offset, leader_vel);
 
-	// target location within formation in relation to leader's location
+	double heading_angle = std::atan2(leader_vel[1], leader_vel[0]); // atan2(vy, vx)
+	double cosH = std::cos(heading_angle);
+	double sinH = std::sin(heading_angle);
+
+	double local_side = formation_offset[0];	 // left/right
+	double local_forward = -formation_offset[1]; // forward along heading (invert so -Y = behind)
+
+	double world_dx = local_forward * cosH + local_side * (-sinH);
+	double world_dy = local_forward * sinH + local_side * cosH;
+
+	// Rotate into world frame in the XY plane, keep Z as-is
+	std::array<double, 3> rotated_offset = {
+		world_dx,
+		world_dy,
+		formation_offset[2]};
+
+	// Target location within formation in relation to leader's location
 	std::array<double, 3> formation_target = {
 		leader_pos[0] + rotated_offset[0],
 		leader_pos[1] + rotated_offset[1],
@@ -195,8 +241,8 @@ std::array<double, 3> UAV::calculate_formation_force()
 		formation_target[2] - get_z()};
 
 	// formation control parameters
-	double formation_gain = 0.15;	  // proportional position gain (0.03 - 0.10 depending on under/overcorrecting)
-	double formation_force_cap = 2.0; // limit on output magnitude (0.5 - 2.0) - higher allows faster "catch-up"
+	double formation_gain = 0.15;	  // proportional position gain
+	double formation_force_cap = 2.0; // limit on output magnitude
 
 	// scale position error with proportional position gain
 	std::array<double, 3> formation_command = {
@@ -205,31 +251,20 @@ std::array<double, 3> UAV::calculate_formation_force()
 		formation_gain * formation_error[2],
 	};
 
-	// if (get_id() == 1) {
-	// 	std::cout << "formation_offset : " << formation_offset[0]  << ", " << formation_offset[1]  << ", " << formation_offset[2] << std::endl;
-	// 	std::cout << "rotated_offset   : " << rotated_offset[0]    << ", " << rotated_offset[1]    << ", " << rotated_offset[2] << std::endl;
-	// 	std::cout << "formation_target : " << formation_target[0]  << ", " << formation_target[1]  << ", " << formation_target[2] << std::endl;
-	// 	std::cout << "formation_error  : " << formation_error[0]   << ", " << formation_error[1]   << ", " << formation_error[2] << std::endl;
-	// 	std::cout << "formation_command: " << formation_command[0] << ", " << formation_command[1] << ", " << formation_command[2] << std::endl;
-	// }
-
 	// compute magnitude and apply control parameters if necessary
-	double command_magnitude = sqrt(
+	double command_magnitude = std::sqrt(
 		(formation_command[0] * formation_command[0]) +
 		(formation_command[1] * formation_command[1]) +
 		(formation_command[2] * formation_command[2]));
-	if (command_magnitude > formation_force_cap)
+	if (command_magnitude > formation_force_cap && command_magnitude > 1e-6)
 	{
-		formation_command[0] *= formation_force_cap / command_magnitude;
-		formation_command[1] *= formation_force_cap / command_magnitude;
-		formation_command[2] *= formation_force_cap / command_magnitude;
+		double scale = formation_force_cap / command_magnitude;
+		formation_command[0] *= scale;
+		formation_command[1] *= scale;
+		formation_command[2] *= scale;
 	}
 
-	// if (get_id() == 1) {
-	// 	std::cout << "formation_command: " << formation_command[0] << ", " << formation_command[1] << ", " << formation_command[2] << std::endl << std::endl;
-	// }
-
-	return (formation_command);
+	return formation_command;
 }
 
 /**
@@ -322,6 +357,15 @@ void UAV::apply_boids_forces()
 	double target_altitude = tuning.target_altitude;
 
 	std::array<double, 3> formation_force = calculate_formation_force();
+
+	// skip formation forces for the first few timesteps so the swarm doesn't explode on spawn
+	static int formation_bootstrap_steps = 0;
+	if (formation_bootstrap_steps < 5)
+	{
+		formation_force = {0.0, 0.0, 0.0};
+		++formation_bootstrap_steps;
+	}
+
 	std::array<double, 3> separation_force = calculate_separation_forces();
 	std::array<double, 3> alignment_force = calculate_alignment_forces();
 	std::array<double, 3> net_force;

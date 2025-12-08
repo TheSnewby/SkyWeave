@@ -8,17 +8,15 @@ void SwarmCoordinator::calculate_formation_offsets(int num_uavs, formation f)
 	switch (f)
 	{
 	case LINE:
-		for (int i = 0; i < num_uavs; i++)
+		if (num_uavs > 0)
+			formation_offsets[0] = {0, 0, 0};
+
+		for (int i = 1; i < num_uavs; i++)
 		{
-			if (i == 0)
-				formation_offsets[0] = {0, 0, 0};
-			else
-			{
-				int wing = (i + 1) / 2;
-				int side = (i % 2 == 1) ? -1 : 1;
-				formation_offsets[i] = {
-					wing * side * separation, 0, 0};
-			}
+			formation_offsets[i] = {
+				0.0,
+				-static_cast<double>(i) * separation,
+				0.0};
 		}
 		break;
 
