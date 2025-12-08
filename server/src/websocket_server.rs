@@ -121,6 +121,51 @@ async fn send_control_command_to_sim(command: &str) {
     }
 }
 
+/// Send updated swarm settings to the simulator over UDP as JSON.
+async fn send_swarm_settings_to_sim(settings: &SwarmSettings) {
+    let addr = sim_addr();
+
+    let payload = serde_json::json!({
+        "type": "swarm_settings",
+        "payload": {
+            "cohesion": settings.cohesion,
+            "separation": settings.separation,
+            "alignment": settings.alignment,
+            // sim expects camelCase key for max speed
+            "maxSpeed": settings.max_speed,
+            // target_altitude is not currently consumed by the sim, but we include it for completeness
+            "target_altitude": settings.target_altitude,
+        }
+    });
+
+    let msg = match serde_json::to_string(&payload) {
+        Ok(m) => m,
+        Err(err) => {
+            tracing::warn!(
+                "Failed to serialize swarm_settings for sim: {} (settings = {:?})",
+                err,
+                settings
+            );
+            return;
+        }
+    };
+
+    match UdpSocket::bind("[::]:0").await {
+        Ok(socket) => {
+            tracing::info!("sending swarm_settings UDP to sim {}: {}", addr, msg);
+            if let Err(err) = socket.send_to(msg.as_bytes(), &addr).await {
+                tracing::warn!("Failed to send swarm_settings to sim: {}", err);
+            }
+        }
+        Err(err) => {
+            tracing::warn!(
+                "Failed to bind UDP socket for swarm_settings command: {}",
+                err
+            );
+        }
+    }
+}
+
 /// handle a single WebSocket client connection
 async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
     let span = tracing::info_span!("ws_client");
@@ -248,10 +293,15 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                                         }
 
                                         Ok(ClientMessage::SwarmSettings(settings)) => {
-                                            // apply and then echo settings update back to this client
+                                            // apply settings to the in-memory swarm model
                                             let settings_clone = settings.clone();
                                             shared.swarm.apply_settings(settings).await;
 
+                                            // forward updated settings to the simulator over UDP so the
+                                            // C++ side can update its boids weights in real time
+                                            send_swarm_settings_to_sim(&settings_clone).await;
+
+                                            // echo settings update back to this WS client for UI sync
                                             let payload = serde_json::json!({
                                                 "type": "settings_update",
                                                 "payload": {
