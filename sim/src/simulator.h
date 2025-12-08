@@ -42,8 +42,8 @@ private:
 	std::atomic<bool> command_listener_running{false};
 	int command_port = 6001;
 	Environment env;
-	// Pathfinder pathfinder;
-	// Pathfollower pathfollower;
+	Pathfinder pathfinder;
+	Pathfollower pathfollower;
 
 public:
 	UAVSimulator(int num_drones);
