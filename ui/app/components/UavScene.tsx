@@ -1,8 +1,9 @@
 "use client";
 import { useRef } from "react";
 
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Line } from "@react-three/drei";
+import * as THREE from "three";
 import { UavState, ObstacleType } from "../hooks/useTelemetry";
 
 type CameraTarget = {
@@ -18,6 +19,28 @@ type Props = {
 	formationMode?: string;
 	obstacles?: ObstacleType[];
 };
+
+function LeaderOrbitControls({ target }: { target: [number, number, number] }) {
+	const controlsRef = useRef<any>(null);
+
+	useFrame(() => {
+		if (!controlsRef.current) return;
+
+		const [x, y, z] = target;
+		// smoothly lerp the controls target toward the leader position
+		const desired = new THREE.Vector3(x, y, z);
+		controlsRef.current.target.lerp(desired, 0.15);
+		controlsRef.current.update();
+	});
+
+	return (
+		<OrbitControls
+			ref={controlsRef}
+			enableDamping
+			enablePan={false}
+		/>
+	);
+}
 
 /**
  * UavScene
@@ -37,7 +60,8 @@ export default function UavScene({
 	formationMode,
 	obstacles = [],
 }: Props) {
-	const scale = 0.1; // shrinks world into view
+	const scale = 1.0; // shrinks world into view
+	const obstacleVisualScale = 3.0; // make obstacles chonkier
 
 	const trailsRef = useRef<Map<number, [number, number, number][]>>(new Map());
 
@@ -61,8 +85,21 @@ export default function UavScene({
 
 	const formation = formationMode ? formationMode.toUpperCase() : "N/A";
 
+	// leader position in the centered frame (used for camera targeting)
+	const leaderTarget: [number, number, number] | null = leader
+		? [
+			leader.position.x * scale - originX,
+			leader.position.z * scale,
+			leader.position.y * scale - originZ,
+		]
+		: null;
+
 	return (
 		<div className="w-full h-96 mc-panel mc-panel-inner overflow-hidden relative bg-gradient-to-b from-black/80 to-black/95 border border-emerald-700/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+			{/* HUD: obstacle count */}
+			<div className="absolute bottom-2 left-3 z-20 nasa-text text-[0.65rem] text-emerald-300 bg-black/60 px-2 py-1 rounded">
+				Obstacle Count: {obstacles.length}
+			</div>
 			{!leader && (
 				<div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
 					<div className="mc-panel-inner nasa-text text-xs tracking-widest text-emerald-300 bg-black/60 px-4 py-2 rounded">
@@ -139,8 +176,12 @@ export default function UavScene({
 
 					{/* server-synced obstacles */}
 					{obstacles.map((obs, idx) => {
+						// base altitude from sim (z), then lift by half-height / radius
 						if (obs.type === "cylinder") {
-							const centerY = obs.z * scale;
+							const baseAltitude = obs.z * scale;
+							const visualHeight = obs.height * scale * obstacleVisualScale;
+							const centerY = baseAltitude + visualHeight / 2; // base on grid
+
 							return (
 								<group
 									key={`obs-${idx}`}
@@ -149,17 +190,19 @@ export default function UavScene({
 									<mesh>
 										<cylinderGeometry
 											args={[
-												obs.radius * scale,
-												obs.radius * scale,
-												obs.height * scale,
+												obs.radius * scale * obstacleVisualScale,
+												obs.radius * scale * obstacleVisualScale,
+												visualHeight,
 												24,
 											]}
 										/>
-										<meshBasicMaterial
+										<meshStandardMaterial
 											color="#00ff00"
+											emissive="#00ff00"
+											emissiveIntensity={1.5}
 											wireframe
 											transparent
-											opacity={0.4}
+											opacity={0.75}
 										/>
 									</mesh>
 								</group>
@@ -167,7 +210,10 @@ export default function UavScene({
 						}
 
 						if (obs.type === "box") {
-							const centerY = obs.z * scale;
+							const baseAltitude = obs.z * scale;
+							const visualHeight = obs.height * scale * obstacleVisualScale;
+							const centerY = baseAltitude + visualHeight / 2;
+
 							return (
 								<group
 									key={`obs-${idx}`}
@@ -176,16 +222,18 @@ export default function UavScene({
 									<mesh>
 										<boxGeometry
 											args={[
-												obs.width * scale,
-												obs.height * scale,
-												obs.depth * scale,
+												obs.width * scale * obstacleVisualScale,
+												visualHeight,
+												obs.depth * scale * obstacleVisualScale,
 											]}
 										/>
-										<meshBasicMaterial
+										<meshStandardMaterial
 											color="#00ff00"
+											emissive="#00ff00"
+											emissiveIntensity={1.5}
 											wireframe
 											transparent
-											opacity={0.4}
+											opacity={0.75}
 										/>
 									</mesh>
 								</group>
@@ -193,21 +241,24 @@ export default function UavScene({
 						}
 
 						if (obs.type === "sphere") {
-							const centerY = obs.z * scale;
+							const baseAltitude = obs.z * scale;
+							const visualRadius = obs.radius * scale * obstacleVisualScale;
+							const centerY = baseAltitude + visualRadius; // rest on grid
+
 							return (
 								<group
 									key={`obs-${idx}`}
 									position={[obs.x * scale, centerY, obs.y * scale]}
 								>
 									<mesh>
-										<sphereGeometry
-											args={[obs.radius * scale, 24, 24]}
-										/>
-										<meshBasicMaterial
+										<sphereGeometry args={[visualRadius, 24, 24]} />
+										<meshStandardMaterial
 											color="#00ff00"
+											emissive="#00ff00"
+											emissiveIntensity={1.5}
 											wireframe
 											transparent
-											opacity={0.4}
+											opacity={0.75}
 										/>
 									</mesh>
 								</group>
@@ -223,7 +274,7 @@ export default function UavScene({
 
 					// render positions in a frame centered on the leader so the grid moves with the swarm
 					const headX = uav.position.x * scale - originX;
-					const headY = uav.position.z * scale + 0.75; // altitude uses z
+					const headY = uav.position.z * scale; // altitude uses z, no extra lift
 					const headZ = uav.position.y * scale - originZ; // depth uses y, centered on leader
 
 					// scale UAV size slightly based on altitude: higher = larger, lower = smaller
@@ -291,14 +342,13 @@ export default function UavScene({
 
 					return (
 						<group key={uav.id}>
-							{/* UAV glyph (core + halo) scaled by altitude */}
 							<group
 								position={[headX, headY, headZ]}
 								scale={[sizeFactor, sizeFactor, sizeFactor]}
 							>
 								{/* core glowing sphere */}
 								<mesh>
-									<sphereGeometry args={[0.4, 24, 24]} />
+									<sphereGeometry args={[1.2, 24, 24]} />
 									<meshStandardMaterial
 										color={isLeader ? "#facc15" : "#22d3ee"} // gold for leader, cyan for followers
 										emissive={isLeader ? "#eab308" : "#06b6d4"}
@@ -308,29 +358,32 @@ export default function UavScene({
 
 								{/* soft halo around each UAV for extra glow */}
 								<mesh>
-									<sphereGeometry args={[0.7, 24, 24]} />
+									<sphereGeometry args={[2.1, 24, 24]} />
 									<meshStandardMaterial
 										color={isLeader ? "#facc15" : "#22d3ee"}
 										transparent
 										opacity={0.15}
 									/>
 								</mesh>
-								{/* animated, fading trail line using drei's Line */}
-								{showTrails && trail.length >= 2 && (
-									<Line
-										points={trailPoints}
-										vertexColors={trailColors}
-										lineWidth={
-											(isLeader ? 2.5 : 1.5) * (0.8 + altNorm * 0.4)
-										}
-									/>
-								)}
 							</group>
+
+							{/* animated, fading trail line using drei's Line (world-space points) */}
+							{showTrails && trail.length >= 2 && (
+								<Line
+									points={trailPoints}
+									vertexColors={trailColors}
+									lineWidth={(isLeader ? 2.5 : 1.5) * (0.8 + altNorm * 0.4)}
+								/>
+							)}
 						</group>
 					);
 				})}
 
-				<OrbitControls enableDamping />
+				{leaderTarget ? (
+					<LeaderOrbitControls target={leaderTarget} />
+				) : (
+					<OrbitControls enableDamping enablePan={false} />
+				)}
 			</Canvas>
 		</div>
 	);
