@@ -133,7 +133,6 @@ async fn send_swarm_settings_to_sim(settings: &SwarmSettings) {
             "alignment": settings.alignment,
             // sim expects camelCase key for max speed
             "maxSpeed": settings.max_speed,
-            // target_altitude is not currently consumed by the sim, but we include it for completeness
             "target_altitude": settings.target_altitude,
         }
     });

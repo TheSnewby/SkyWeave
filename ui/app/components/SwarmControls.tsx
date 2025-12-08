@@ -70,7 +70,7 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 					label="SEPARATION"
 					min={0}
 					max={20}
-					step={0.1}
+					step={0.5}
 					value={settings.separation}
 					onChange={(v) => updateField("separation", v)}
 				/>
@@ -92,7 +92,7 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 					label="MAX SPEED (m/s)"
 					min={0}
 					max={5}
-					step={1}
+					step={0.5}
 					value={settings.maxSpeed}
 					onChange={(v) => updateField("maxSpeed", v)}
 				/>
@@ -101,7 +101,7 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 				<ControlRow
 					label="TARGET ALTITUDE (m)"
 					min={0}
-					max={500}
+					max={200}
 					step={10}
 					value={settings.targetAltitude}
 					onChange={(v) => updateField("targetAltitude", v)}

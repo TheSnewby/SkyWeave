@@ -30,8 +30,8 @@ export default function TelemetryPage() {
 		cohesion: 1.0,
 		separation: 1.0,
 		alignment: 1.0,
-		maxSpeed: 60,
-		targetAltitude: 50,
+		maxSpeed: 10,
+		targetAltitude: 20,
 	});
 	const [formationMode, setFormationMode] = useState<string | undefined>(undefined);
 

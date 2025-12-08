@@ -23,32 +23,28 @@ void SwarmCoordinator::calculate_formation_offsets(int num_uavs, formation f)
 		break;
 
 	case FLYING_V:
+		// Leader at origin in local formation space
+		if (num_uavs > 0)
+			formation_offsets[0] = {0, 0, 0};
+
 		for (int i = 1; i < num_uavs; i++)
 		{
-			if (i == 0)
-			{
-				formation_offsets[0] = {0, 0, 0};
-			}
-			else
-			{
-				int wing = (i + 1) / 2;
-				int side = (i % 2 == 1) ? -1 : 1;
-				formation_offsets[i] = {
-					wing * side * separation,
-					-wing * separation,
-					0};
-			}
+			int wing = (i + 1) / 2;
+			int side = (i % 2 == 1) ? -1 : 1;
+			formation_offsets[i] = {
+				wing * side * separation, // left/right
+				-wing * separation,		  // behind leader
+				0};
 		}
 		break;
 
 	case CIRCLE:
-		const double radius = get_separation(); // might make dependent on user-input
-		const double base_altitude = get_target_altitude();
+		// Circle in local XY; altitude is controlled by the UAV's altitude controller
+		// using the swarm's target_altitude, not by these local offsets.
+		const double radius = get_separation();
 
 		for (int i = 0; i < num_uavs; i++)
 		{
-			double x, y, z;
-
 			// leader front and center
 			if (i == 0)
 			{
@@ -63,6 +59,7 @@ void SwarmCoordinator::calculate_formation_offsets(int num_uavs, formation f)
 					0};
 			}
 		}
+		break;
 	}
 }
 

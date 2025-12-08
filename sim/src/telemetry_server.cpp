@@ -146,13 +146,13 @@ void UAVTelemetryServer::update_json_pkg(const char *json_str, const struct sock
 				{
 					tuning.alignment = p["alignment"].get<double>();
 				}
-				if (p.contains("maxSpeed") && p["maxSpeed"].is_number())
+				if (p.contains("max_speed") && p["max_speed"].is_number())
 				{
-					tuning.max_speed = p["maxSpeed"].get<double>();
+					tuning.max_speed = p["max_speed"].get<double>();
 				}
-				if (p.contains("targetAltitude") && p["targetAltitude"].is_number())
+				if (p.contains("target_altitude") && p["target_altitude"].is_number())
 				{
-					tuning.target_altitude = p["targetAltitude"].get<double>();
+					tuning.target_altitude = p["target_altitude"].get<double>();
 				}
 
 				set_swarm_tuning(tuning);
