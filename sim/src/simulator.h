@@ -45,8 +45,8 @@ public:
 	UAVSimulator(int num_drones);
 	~UAVSimulator();
 
-	//getter
-	std::vector<UAV>& get_swarm() { return swarm; }
+	// getter
+	std::vector<UAV> &get_swarm() { return swarm; }
 	formation get_formation() { return form; }
 
 	// setters
@@ -62,16 +62,20 @@ public:
 	void start_command_listener();
 	void stop_command_listener();
 
+	void resize_swarm(int new_size);
+
 private:
 	void create_formation_random(int num_uavs); // default creation
 	void create_formation_line(int num_uavs);	// not sure if will be used
 	void create_formation_vee(int num_uavs);	// not sure if will be used
-	void create_formation_circle(int num_uavs);	// not sure if will be used
+	void create_formation_circle(int num_uavs); // not sure if will be used
 
 	void set_formation_line(int num_uavs);
 	void set_formation_vee(int num_uavs);
 	void set_formation_circle(int num_uavs);
 
 	void command_listener_loop();
-	void start_turn_timer(); 							// for testing
+
+	void start_turn_timer(); 		// for testing
+	void generate_test_obstacles(); // for testing
 };
