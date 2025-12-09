@@ -9,6 +9,7 @@ export type SwarmSettings = {
 	alignment: number; // how strongly they match neighbor heading
 	maxSpeed: number; // cap on speed (m/s)
 	targetAltitude: number; // preferred cruise altitude
+	swarmSize: number; // number of UAVs in the swarm
 };
 
 type SwarmControlsProps = {
@@ -40,6 +41,7 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 				alignment: next.alignment,
 				maxSpeed: next.maxSpeed,
 				targetAltitude: next.targetAltitude,
+				swarmSize: next.swarmSize,
 			},
 		});
 	};
@@ -70,7 +72,7 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 					label="SEPARATION"
 					min={0}
 					max={20}
-					step={0.1}
+					step={0.5}
 					value={settings.separation}
 					onChange={(v) => updateField("separation", v)}
 				/>
@@ -92,7 +94,7 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 					label="MAX SPEED (m/s)"
 					min={0}
 					max={5}
-					step={1}
+					step={0.5}
 					value={settings.maxSpeed}
 					onChange={(v) => updateField("maxSpeed", v)}
 				/>
@@ -101,10 +103,20 @@ export default function SwarmControls({ settings, onChange }: SwarmControlsProps
 				<ControlRow
 					label="TARGET ALTITUDE (m)"
 					min={0}
-					max={500}
+					max={200}
 					step={10}
 					value={settings.targetAltitude}
 					onChange={(v) => updateField("targetAltitude", v)}
+				/>
+
+				{/* swarm size */}
+				<ControlRow
+					label="SWARM SIZE (UAVs)"
+					min={1}
+					max={20}
+					step={1}
+					value={settings.swarmSize}
+					onChange={(v) => updateField("swarmSize", v)}
 				/>
 			</div>
 		</section>

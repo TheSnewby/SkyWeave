@@ -7,8 +7,7 @@ export type Command =
 	| { type: "move_leader"; direction: "accelerate" | "decelerate" | "left" | "right" }
 	| { type: "altitude_change"; amount: number }
 	| { type: "formation"; mode: "line" | "vee" | "circle" }
-	| { type: "pause" }
-	| { type: "resume" }
+	| { type: "flight_mode"; mode: "autonomous" | "controlled" }
 	| { type: "rtb" }; // return to base (leader)
 
 type CommandPanelProps = {
@@ -29,6 +28,7 @@ export default function CommandPanel({ onCommand, status }: CommandPanelProps) {
 	const isDisabled = status !== "open";
 
 	const [keyPress, setKeyPress] = useState<string | null>(null);
+	const [autonomous, setAutonomous] = useState<boolean>(false);
 
 	// Keyboard bindings for visual feedback only (commands are handled in page.tsx)
 	useEffect(() => {
@@ -75,6 +75,12 @@ export default function CommandPanel({ onCommand, status }: CommandPanelProps) {
 			window.removeEventListener("keyup", handleKeyUp);
 		};
 	}, [isDisabled]);
+
+	const handleToggleFlightMode = () => {
+		const next = !autonomous;
+		setAutonomous(next);
+		onCommand({ type: "flight_mode", mode: next ? "autonomous" : "controlled" });
+	};
 
 	return (
 		<section className="mc-panel mc-panel-inner bg-gradient-to-b from-emerald-900/60 to-black/85 nasa-text text-xs border border-emerald-400/60 shadow-[0_0_22px_rgba(16,185,129,0.55)]">
@@ -207,27 +213,20 @@ export default function CommandPanel({ onCommand, status }: CommandPanelProps) {
 
 			{/* global controls */}
 			<div className="mb-1 tracking-wide">GLOBAL COMMANDS</div>
-			<div className="grid grid-cols-3 gap-2">
+			<div className="grid grid-cols-2 gap-2">
 				<button
 					className="mc-button btn-glow nasa-text font-semibold tracking-widest text-[0.85rem] px-3 py-2 bg-emerald-900/50 hover:bg-emerald-500/30 border border-emerald-300/70 text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.9)] drop-shadow-[0_0_6px_rgba(16,185,129,0.9)] disabled:opacity-40 disabled:cursor-not-allowed active:translate-y-[2px] active:brightness-90 transition-all"
 					disabled={isDisabled}
-					onClick={() => onCommand({ type: "pause" })}
+					onClick={handleToggleFlightMode}
 				>
-					PAUSE
-				</button>
-				<button
-					className="mc-button btn-glow nasa-text font-semibold tracking-widest text-[0.85rem] px-3 py-2 bg-emerald-900/50 hover:bg-emerald-500/30 border border-emerald-300/70 text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.9)] drop-shadow-[0_0_6px_rgba(16,185,129,0.9)] disabled:opacity-40 disabled:cursor-not-allowed active:translate-y-[2px] active:brightness-90 transition-all"
-					disabled={isDisabled}
-					onClick={() => onCommand({ type: "resume" })}
-				>
-					RESUME
+					{autonomous ? "AUTONOMOUS" : "CONTROLLED"}
 				</button>
 				<button
 					className="mc-button btn-glow nasa-text font-semibold tracking-widest text-[0.85rem] px-3 py-2 bg-emerald-900/50 hover:bg-emerald-500/30 border border-emerald-300/70 text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.9)] drop-shadow-[0_0_6px_rgba(16,185,129,0.9)] disabled:opacity-40 disabled:cursor-not-allowed active:translate-y-[2px] active:brightness-90 transition-all"
 					disabled={isDisabled}
 					onClick={() => onCommand({ type: "rtb" })}
 				>
-					RTB
+					RETURN
 				</button>
 			</div>
 		</section>

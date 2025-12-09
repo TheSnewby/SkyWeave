@@ -159,7 +159,7 @@ export default function UavScene({
 					</div>
 				</div>
 			)}
-			<Canvas camera={{ position: [0, 12, 22], fov: 50 }}>
+			<Canvas camera={{ position: [0, 75, 100], fov: 50 }}>
 				<ambientLight intensity={0.6} />
 				<directionalLight position={[8, 15, 5]} intensity={1.0} />
 

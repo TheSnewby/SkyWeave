@@ -13,6 +13,14 @@ type Props = {
  * uses global .nasa-text styling for green glowing HUD text
  */
 export default function TelemetryTable({ uavs }: Props) {
+	const sortedUavs = [...uavs].sort((a, b) => {
+		// Leader (id 0) always first
+		if (a.id === 0 && b.id !== 0) return -1;
+		if (b.id === 0 && a.id !== 0) return 1;
+		// Otherwise sort by id ascending
+		return a.id - b.id;
+	});
+
 	return (
 		<section className="mc-panel mc-panel-inner overflow-hidden bg-gradient-to-b from-black/80 to-black/95 border border-emerald-700/40 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
 			<h2 className="mb-4">
@@ -56,7 +64,7 @@ export default function TelemetryTable({ uavs }: Props) {
 							</td>
 						</tr>
 					) : (
-						uavs.map((uav) => {
+						sortedUavs.map((uav) => {
 							const speed = Math.sqrt(
 								uav.velocity.vx * uav.velocity.vx +
 								uav.velocity.vy * uav.velocity.vy +
