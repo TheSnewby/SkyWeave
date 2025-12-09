@@ -10,6 +10,14 @@ void UAVSimulator::generate_test_obstacles() {
 }
 
 /**
+ * RTB - Return To Base: returns leader to base 
+ */
+void UAVSimulator::RTB() {
+	pathfinder.plan(swarm[0].get_pos(), {0, 0, 20});
+}
+
+
+/**
  * print_swarm_status: prints all UAV's position and velocity to stdout
  */
 void UAVSimulator::print_swarm_status()
@@ -42,7 +50,7 @@ UAVSimulator::UAVSimulator(int num_uavs) :
 	for (int i = 0; i < num_uavs; i++)
 	{
 		// leader and followers start co-located; formation offsets will spread them out
-		swarm.push_back(UAV(i, 8000 + i, 0.0, 0.0, 20.0));
+		swarm.push_back(UAV(i, 8000 + i, 0.0, 0.0, 20.0, env));
 		// give everyone an initial forward velocity along +Y
 		swarm[i].set_velocity(0.0, 1.0, 0.0); // cruisin on y axis
 	}

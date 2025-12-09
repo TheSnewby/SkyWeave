@@ -146,14 +146,15 @@ void Environment::addBox(double x0, double y0, double z0, double x1, double y1, 
 {
 	std::array<int, 3> g0 = toGrid({x0, y0, z0});
 	std::array<int, 3> g1 = toGrid({x1, y1, z1});
+	int safety_margin = 1; // 1 or 2 grids. adds a phantom boundary to base a repulsion force from
 
 	// place in valid index range
-	int i0 = std::max(0, std::min(nx - 1, std::min(g0[0], g1[0])));
-	int i1 = std::max(0, std::min(nx - 1, std::max(g0[0], g1[0])));
-	int j0 = std::max(0, std::min(ny - 1, std::min(g0[1], g1[1])));
-	int j1 = std::max(0, std::min(ny - 1, std::max(g0[1], g1[1])));
-	int k0 = std::max(0, std::min(nz - 1, std::min(g0[2], g1[2])));
-	int k1 = std::max(0, std::min(nz - 1, std::max(g0[2], g1[2])));
+	int i0 = std::max(0, std::min(nx - 1, std::min(g0[0], g1[0]) - safety_margin));
+	int i1 = std::max(0, std::min(nx - 1, std::max(g0[0], g1[0]) + safety_margin));
+	int j0 = std::max(0, std::min(ny - 1, std::min(g0[1], g1[1]) - safety_margin));
+	int j1 = std::max(0, std::min(ny - 1, std::max(g0[1], g1[1]) + safety_margin));
+	int k0 = std::max(0, std::min(nz - 1, std::min(g0[2], g1[2]) - safety_margin));
+	int k1 = std::max(0, std::min(nz - 1, std::max(g0[2], g1[2]) + safety_margin));
 
 	// mark
 	for (int k = k0; k <= k1; k++)

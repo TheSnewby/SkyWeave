@@ -328,6 +328,44 @@ std::array<double, 3> UAV::calculate_alignment_forces()
 }
 
 /**
+ * calculate_obstacle_forces - calculates repulsion force from obstacles onto UAV
+ *
+ * Return: repulsion obstacle force
+ */
+std::array<double, 3> UAV::calculate_obstacle_forces() {
+	std::array<int, 3> gridPos = env.toGrid(get_pos());
+	std::array<double, 3> obstacleForce = {0, 0, 0};
+
+	int checkRadius = 3;	// 1 - 3
+	double maxForce = 5.0; 	// might remove if results undesireable
+
+	for (int dk = -checkRadius; dk <= checkRadius; dk++) {
+		for (int dj = -checkRadius; dj <= checkRadius; dj++) {
+			for (int di = -checkRadius; di <= checkRadius; di++) {
+				if (di == 0 && dj == 0 && dk == 0)
+					continue;
+
+				int ni = gridPos[0] + di;
+				int nj = gridPos[1] + dj;
+				int nk = gridPos[2] + dk;
+
+				if (env.isBlocked(ni, nj, nk)) {
+					double distance = sqrt(di * di + dj * dj + dk * dk);
+					if (distance > 0) {
+						double strength = maxForce / (distance * distance); //inverse square
+						obstacleForce[0] += (di / distance) * strength;
+						obstacleForce[1] += (dj / distance) * strength;
+						obstacleForce[2] += (dk / distance) * strength;
+					}
+				}
+			}
+		}
+	}
+
+	return (obstacleForce);
+}
+
+/**
  * apply_boids_forces - applies boids forces to the heading and velocity of the uav
  */
 void UAV::apply_boids_forces()
@@ -335,11 +373,13 @@ void UAV::apply_boids_forces()
 	double internal_formation_weight = 1.5;
 	double internal_separation_weight = 2.0;
 	double internal_alignment_weight = 0.3; // alignment is mostly redundant and may be fully phased out in the future
+	double internal_obstacle_weight = 3.0;  // Obstacle Avoidance
 
 	SwarmTuning tuning = get_swarm_tuning();
 	double cohesion_weight = tuning.cohesion;
 	double separation_weight = tuning.separation;
 	double alignment_weight = tuning.alignment;
+	double obstacle_weight = 1.0;
 	double max_speed = tuning.max_speed;
 	double target_altitude = tuning.target_altitude;
 	double swarm_size = tuning.swarm_size;
@@ -356,39 +396,46 @@ void UAV::apply_boids_forces()
 
 	std::array<double, 3> separation_force = calculate_separation_forces();
 	std::array<double, 3> alignment_force = calculate_alignment_forces();
+	std::array<double, 3> obstacle_force = calculate_obstacle_forces();
 	std::array<double, 3> net_force;
 	std::array<double, 3> new_velocity;
 	std::array<double, 3> current_velocity = get_vel();
 
-	double fmag = sqrt(formation_force[0] * formation_force[0] +
-					   formation_force[1] * formation_force[1] +
-					   formation_force[2] * formation_force[2]);
-	double smag = sqrt(separation_force[0] * separation_force[0] +
-					   separation_force[1] * separation_force[1] +
-					   separation_force[2] * separation_force[2]);
-	double amag = sqrt(alignment_force[0] * alignment_force[0] +
-					   alignment_force[1] * alignment_force[1] +
-					   alignment_force[2] * alignment_force[2]);
+	// double fmag = sqrt(formation_force[0] * formation_force[0] +
+	// 				   formation_force[1] * formation_force[1] +
+	// 				   formation_force[2] * formation_force[2]);
+	// double smag = sqrt(separation_force[0] * separation_force[0] +
+	// 				   separation_force[1] * separation_force[1] +
+	// 				   separation_force[2] * separation_force[2]);
+	// double amag = sqrt(alignment_force[0] * alignment_force[0] +
+	// 				   alignment_force[1] * alignment_force[1] +
+	// 				   alignment_force[2] * alignment_force[2]);
 	// if (get_id() == 1)
 	// 	std::cout << "F="<<fmag<<" S="<<smag<<" A="<<amag<<std::endl;
 
-	std::array<double, 3> net_formation_force = {
-		(formation_force[0] * cohesion_weight * internal_formation_weight),
-		(formation_force[1] * cohesion_weight * internal_formation_weight),
-		(formation_force[2] * cohesion_weight * internal_formation_weight)};
+	// std::array<double, 3> net_formation_force = {
+	// 	(formation_force[0] * cohesion_weight * internal_formation_weight),
+	// 	(formation_force[1] * cohesion_weight * internal_formation_weight),
+	// 	(formation_force[2] * cohesion_weight * internal_formation_weight)};
 
-	std::array<double, 3> net_separation_force = {
-		(separation_force[0] * separation_weight * internal_separation_weight),
-		(separation_force[1] * separation_weight * internal_separation_weight),
-		(separation_force[2] * separation_weight * internal_separation_weight)};
+	// std::array<double, 3> net_separation_force = {
+	// 	(separation_force[0] * separation_weight * internal_separation_weight),
+	// 	(separation_force[1] * separation_weight * internal_separation_weight),
+	// 	(separation_force[2] * separation_weight * internal_separation_weight)};
 
-	std::array<double, 3> net_alignment_force = {
-		(alignment_force[0] * alignment_weight * internal_alignment_weight),
-		(alignment_force[1] * alignment_weight * internal_alignment_weight),
-		(alignment_force[2] * alignment_weight * internal_alignment_weight)};
+	// std::array<double, 3> net_alignment_force = {
+	// 	(alignment_force[0] * alignment_weight * internal_alignment_weight),
+	// 	(alignment_force[1] * alignment_weight * internal_alignment_weight),
+	// 	(alignment_force[2] * alignment_weight * internal_alignment_weight)};
 
-	net_force[0] = (formation_force[0] * cohesion_weight * internal_formation_weight) + (separation_force[0] * separation_weight * internal_separation_weight) + (alignment_force[0] * alignment_weight * internal_alignment_weight);
-	net_force[1] = (formation_force[1] * cohesion_weight * internal_formation_weight) + (separation_force[1] * separation_weight * internal_separation_weight) + (alignment_force[1] * alignment_weight * internal_alignment_weight);
+	net_force[0] =	(formation_force[0] * cohesion_weight * internal_formation_weight) +
+					(separation_force[0] * separation_weight * internal_separation_weight) +
+					(alignment_force[0] * alignment_weight * internal_alignment_weight) +
+					(obstacle_force[0] * obstacle_weight * internal_obstacle_weight);
+	net_force[1] =	(formation_force[1] * cohesion_weight * internal_formation_weight) +
+					(separation_force[1] * separation_weight * internal_separation_weight) +
+					(alignment_force[1] * alignment_weight * internal_alignment_weight) +
+					(obstacle_force[1] * obstacle_weight * internal_obstacle_weight);
 
 	// Altitude control: gently push Z toward target_altitude
 	double altitude_error = target_altitude - get_z();
@@ -398,6 +445,7 @@ void UAV::apply_boids_forces()
 	net_force[2] = (formation_force[2] * cohesion_weight * internal_formation_weight) +
 				   (separation_force[2] * separation_weight * internal_separation_weight) +
 				   (alignment_force[2] * alignment_weight * internal_alignment_weight) +
+				   (obstacle_force[2] * obstacle_weight * internal_obstacle_weight) +
 				   altitude_force;
 
 	new_velocity[0] = current_velocity[0] + net_force[0] * UAVDT;

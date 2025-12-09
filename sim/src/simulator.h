@@ -76,6 +76,8 @@ private:
 
 	void command_listener_loop();
 
+	void RTB();
+
 	void start_turn_timer(); 		// for testing
 	void generate_test_obstacles(); // for testing
 };

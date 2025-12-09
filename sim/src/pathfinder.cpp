@@ -19,7 +19,7 @@ void Pathfinder::print_xyz_path(std::vector<std::array<double, 3>> path) {
 	int path_size = path.size();
 
 	for (int i = 0; i < path_size; i++) {
-		std::cout << i << "( " << path[i][0] << ", " << path[i][1] << ", " << path[i][2] << " )"<< std::endl;
+		std::cout << i << ": ( " << path[i][0] << ", " << path[i][1] << ", " << path[i][2] << " )"<< std::endl;
 	}
 }
 
