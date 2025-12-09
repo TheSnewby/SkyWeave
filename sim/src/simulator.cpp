@@ -25,7 +25,9 @@ void UAVSimulator::print_swarm_status()
 /**
  * Constructor for UAVSimulator
  */
-UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y / RESOLUTION, BORDER_Z / RESOLUTION, RESOLUTION)
+UAVSimulator::UAVSimulator(int num_uavs) : 
+										env(BORDER_X / RESOLUTION, BORDER_Y / RESOLUTION, BORDER_Z / RESOLUTION, RESOLUTION),
+										pathfinder(env)
 {
 	swarm.reserve(num_uavs); // allocates memory to reduce resizing slowdowns
 
@@ -57,13 +59,11 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	env.generate_random_obstacles(20);
 	env.environment_to_rust(RUST_UDP_PORT);
 
-	Pathfinder pathfinder(env);
 	std::array<double, 3> startXYZ = swarm[0].get_pos();
 	std::array<double, 3> goalXYZ  = {100, 400, 300};		// make argv?
 	std::vector<std::array<double, 3>> path = pathfinder.plan(startXYZ, goalXYZ);
-
-	Pathfollower pathfollower(swarm[0], env.getResolution());
-	pathfollower.setPath(path);
+	pathfollower = std::make_unique<Pathfollower>(swarm[0], env.getResolution());
+	pathfollower->setPath(path);
 };
 
 /**
@@ -113,7 +113,7 @@ void UAVSimulator::start_sim()
 		while (running) {
 			for (auto &uav : swarm) {
 				if (uav.get_id() == 0) // comment out these two lines if not functioning
-					pathfollower.update_leader_velocity(UAVDT);
+					pathfollower->update_leader_velocity(UAVDT);
 				uav.update_position(UAVDT); // UAVDT found in uav.h
 				uav.uav_to_telemetry_server(telemetry_port);
 			}

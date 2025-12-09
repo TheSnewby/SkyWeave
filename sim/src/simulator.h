@@ -10,27 +10,21 @@
 #include <iomanip>
 #include <cstring>
 #include <algorithm>
+#include <memory>
 #include "environment.h"
 #include "pathfinder.h"
 #include "pathfollower.h"
+#include "formation.h"
 
 constexpr int RUST_UDP_PORT = 6000;
 
 class UAVTelemetryServer;
-
 class UAV; 
 
 #define BORDER_X 500
 #define BORDER_Y 500
 #define BORDER_Z 500
 #define RESOLUTION 5
-
-enum formation {
-	RANDOM = 0,
-	LINE, 
-	FLYING_V,
-	CIRCLE,
-};
 
 class UAVSimulator {
 private:
@@ -45,7 +39,7 @@ private:
 	int command_port = 6001;
 	Environment env;
 	Pathfinder pathfinder;
-	Pathfollower pathfollower;
+	std::unique_ptr<Pathfollower> pathfollower;
 
 public:
 	UAVSimulator(int num_drones);
