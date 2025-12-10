@@ -1,21 +1,23 @@
 #include "simulator.h"
 #include "uav.h"
+#include <cmath>
 
 /**
  * generate_test_obstacles - generates obstacles at set locations
  */
-void UAVSimulator::generate_test_obstacles() {
+void UAVSimulator::generate_test_obstacles()
+{
 	env.addBox(-10, 10, 20, 10, 30, 60);
 	env.addBox(-10, -10, 20, 10, 10, 60);
 }
 
 /**
- * RTB - Return To Base: returns leader to base 
+ * RTB - Return To Base: returns leader to base
  */
-void UAVSimulator::RTB() {
+void UAVSimulator::RTB()
+{
 	pathfinder.plan(swarm[0].get_pos(), {0.0, 0.0, 20.0});
 }
-
 
 /**
  * print_swarm_status: prints all UAV's position and velocity to stdout
@@ -41,9 +43,8 @@ void UAVSimulator::print_swarm_status()
 /**
  * Constructor for UAVSimulator
  */
-UAVSimulator::UAVSimulator(int num_uavs) : 
-										env(BORDER_X / RESOLUTION, BORDER_Y / RESOLUTION, BORDER_Z / RESOLUTION, RESOLUTION),
-										pathfinder(env)
+UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y / RESOLUTION, BORDER_Z / RESOLUTION, RESOLUTION),
+										   pathfinder(env)
 {
 	// create base UAVs at a common starting point and base altitude
 	swarm.reserve(num_uavs); // allocates memory to reduce resizing slowdowns
@@ -104,7 +105,7 @@ UAVSimulator::UAVSimulator(int num_uavs) :
 	double corner_offset = RESOLUTION * 0.5; // center of final cell inside bounds
 	double corner_x = (BORDER_X / 2.0) - corner_offset;
 	double corner_y = (BORDER_Y / 2.0) - corner_offset;
-	std::array<double, 3> goalXYZ  = {corner_x, corner_y, startXYZ[2] + 50.0};
+	std::array<double, 3> goalXYZ = {corner_x, corner_y, startXYZ[2] + 50.0};
 	// mark goal for visualization (approx 3x UAV size)
 	env.setGoal(goalXYZ, 6.0);
 	env.environment_to_rust(RUST_UDP_PORT);
@@ -120,7 +121,6 @@ UAVSimulator::~UAVSimulator()
 {
 	stop_sim();
 }
-
 
 /**
  * start_turn_timer - testing function with places for commands
@@ -161,6 +161,24 @@ void UAVSimulator::start_sim()
 			for (auto &uav : swarm) {
 				if (uav.get_id() == 0 && pathfollower && leader_autopilot.load()) // only drive leader when autopilot enabled
 					pathfollower->update_leader_velocity(UAVDT);
+
+				// Apply obstacle repulsion to the leader so it diverts away from collisions
+				if (uav.get_id() == 0) {
+					auto obs = uav.calculate_obstacle_forces();
+					double mag = std::sqrt(obs[0] * obs[0] + obs[1] * obs[1] + obs[2] * obs[2]);
+					if (mag > 1e-6) {
+						const double max_delta = 3.0;
+						double scale = std::min(1.0, max_delta / mag);
+						const double gain = 0.5;
+						auto vel = uav.get_vel();
+						uav.set_velocity(
+							vel[0] + gain * obs[0] * scale,
+							vel[1] + gain * obs[1] * scale,
+							vel[2] + gain * obs[2] * scale
+						);
+					}
+				}
+
 				uav.update_position(UAVDT); // UAVDT found in uav.h
 				uav.uav_to_telemetry_server(telemetry_port);
 			}

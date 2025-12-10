@@ -4,9 +4,37 @@
 
 void UAV::update_position(double dt)
 {
-	pos[0] += vel[0] * dt;
-	pos[1] += vel[1] * dt;
-	pos[2] += vel[2] * dt;
+	// attempt axis-wise movement and stop when hitting blocked cells or bounds
+	std::array<double, 3> next = pos;
+
+	auto canOccupy = [this](const std::array<double, 3> &p)
+	{
+		auto g = env.toGrid(p);
+		return env.inBounds(g[0], g[1], g[2]) && !env.isBlocked(g[0], g[1], g[2]);
+	};
+
+	// X move
+	std::array<double, 3> cand = {pos[0] + vel[0] * dt, pos[1], pos[2]};
+	if (canOccupy(cand))
+		next[0] = cand[0];
+	else
+		vel[0] = 0.0;
+
+	// Y move
+	cand = {next[0], pos[1] + vel[1] * dt, pos[2]};
+	if (canOccupy(cand))
+		next[1] = cand[1];
+	else
+		vel[1] = 0.0;
+
+	// Z move
+	cand = {next[0], next[1], pos[2] + vel[2] * dt};
+	if (canOccupy(cand))
+		next[2] = cand[2];
+	else
+		vel[2] = 0.0;
+
+	pos = next;
 };
 void UAV::remove_neighbor_address(const std::string &address)
 {

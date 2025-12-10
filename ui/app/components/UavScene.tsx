@@ -63,7 +63,7 @@ export default function UavScene({
 	goal = null,
 }: Props) {
 	const scale = 1.0; // shrinks world into view
-	const obstacleVisualScale = 1.0; // keep visuals aligned with collision grid
+	const obstacleVisualScale = 2.0; // visuals match inflated collision footprint
 
 	const trailsRef = useRef<Map<number, [number, number, number][]>>(new Map());
 
@@ -219,9 +219,8 @@ export default function UavScene({
 											color="#00ff00"
 											emissive="#00ff00"
 											emissiveIntensity={1.5}
-											wireframe
 											transparent
-											opacity={0.75}
+											opacity={0.9}
 										/>
 									</mesh>
 								</group>
@@ -249,9 +248,8 @@ export default function UavScene({
 											color="#00ff00"
 											emissive="#00ff00"
 											emissiveIntensity={1.5}
-											wireframe
 											transparent
-											opacity={0.75}
+											opacity={0.9}
 										/>
 									</mesh>
 								</group>
@@ -273,9 +271,8 @@ export default function UavScene({
 											color="#00ff00"
 											emissive="#00ff00"
 											emissiveIntensity={1.5}
-											wireframe
 											transparent
-											opacity={0.75}
+											opacity={0.9}
 										/>
 									</mesh>
 								</group>
