@@ -7,9 +7,10 @@ set(OLD_GLOB
   "/Users/nashthames/SkyWeave-1/sim/src/environment.cpp"
   "/Users/nashthames/SkyWeave-1/sim/src/main.cpp"
   "/Users/nashthames/SkyWeave-1/sim/src/pathfinder.cpp"
+  "/Users/nashthames/SkyWeave-1/sim/src/pathfollower.cpp"
   "/Users/nashthames/SkyWeave-1/sim/src/simulator.cpp"
   "/Users/nashthames/SkyWeave-1/sim/src/swarm_coordinator.cpp"
-  "/Users/nashthames/SkyWeave-1/sim/src/telemetry_encoder.cpp"
+  "/Users/nashthames/SkyWeave-1/sim/src/swarm_tuning.cpp"
   "/Users/nashthames/SkyWeave-1/sim/src/telemetry_server.cpp"
   "/Users/nashthames/SkyWeave-1/sim/src/uav.cpp"
   )

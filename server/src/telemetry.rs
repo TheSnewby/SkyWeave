@@ -185,6 +185,8 @@ impl SwarmState {
 pub struct TelemetryShared {
     pub swarm: SwarmState,
     pub tx: broadcast::Sender<UavState>,
+    /// Broadcast environment (obstacles + goal) updates to WS clients
+    pub env_tx: broadcast::Sender<serde_json::Value>,
     /// Obstacles as last reported by the simulator
     pub obstacles: Arc<RwLock<Vec<ObstacleType>>>,
     /// Goal marker for visualization
@@ -233,6 +235,16 @@ pub async fn run_udp_listener(bind_addr: SocketAddr, shared: TelemetryShared) {
                     {
                         let mut guard = shared.goal.write().await;
                         *guard = env.goal.clone();
+                    }
+                    // broadcast environment update to WebSocket clients
+                    if let Ok(msg) = serde_json::to_value(&serde_json::json!({
+                        "type": "environment",
+                        "payload": {
+                            "obstacles": env.obstacles,
+                            "goal": env.goal,
+                        }
+                    })) {
+                        let _ = shared.env_tx.send(msg);
                     }
                     tracing::info!(
                         "udp_recv: updated environment from sim with {} obstacles and goal={:?}",

@@ -174,6 +174,8 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
 
         // subscribe to telemetry updates
         let mut rx = shared.tx.subscribe();
+        // subscribe to environment updates
+        let mut env_rx = shared.env_tx.subscribe();
 
         // send a snapshot of all UAVs on connect
         if let Ok(initial) = serde_json::to_string(&shared.swarm.list_uavs().await) {
@@ -411,6 +413,13 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                         Err(err) => {
                             tracing::warn!("WebSocket broadcast recv error: {}", err);
                             break;
+                        }
+                    }
+                }
+                env_msg = env_rx.recv() => {
+                    if let Ok(env) = env_msg {
+                        if let Ok(txt) = serde_json::to_string(&env) {
+                            let _ = sender.send(Message::Text(txt)).await;
                         }
                     }
                 }

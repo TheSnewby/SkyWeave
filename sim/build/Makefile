@@ -202,6 +202,30 @@ src/pathfinder.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/pathfinder.cpp.s
 .PHONY : src/pathfinder.cpp.s
 
+src/pathfollower.o: src/pathfollower.cpp.o
+.PHONY : src/pathfollower.o
+
+# target to build an object file
+src/pathfollower.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/pathfollower.cpp.o
+.PHONY : src/pathfollower.cpp.o
+
+src/pathfollower.i: src/pathfollower.cpp.i
+.PHONY : src/pathfollower.i
+
+# target to preprocess a source file
+src/pathfollower.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/pathfollower.cpp.i
+.PHONY : src/pathfollower.cpp.i
+
+src/pathfollower.s: src/pathfollower.cpp.s
+.PHONY : src/pathfollower.s
+
+# target to generate assembly for a file
+src/pathfollower.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/pathfollower.cpp.s
+.PHONY : src/pathfollower.cpp.s
+
 src/simulator.o: src/simulator.cpp.o
 .PHONY : src/simulator.o
 
@@ -250,29 +274,29 @@ src/swarm_coordinator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/swarm_coordinator.cpp.s
 .PHONY : src/swarm_coordinator.cpp.s
 
-src/telemetry_encoder.o: src/telemetry_encoder.cpp.o
-.PHONY : src/telemetry_encoder.o
+src/swarm_tuning.o: src/swarm_tuning.cpp.o
+.PHONY : src/swarm_tuning.o
 
 # target to build an object file
-src/telemetry_encoder.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o
-.PHONY : src/telemetry_encoder.cpp.o
+src/swarm_tuning.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/swarm_tuning.cpp.o
+.PHONY : src/swarm_tuning.cpp.o
 
-src/telemetry_encoder.i: src/telemetry_encoder.cpp.i
-.PHONY : src/telemetry_encoder.i
+src/swarm_tuning.i: src/swarm_tuning.cpp.i
+.PHONY : src/swarm_tuning.i
 
 # target to preprocess a source file
-src/telemetry_encoder.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/telemetry_encoder.cpp.i
-.PHONY : src/telemetry_encoder.cpp.i
+src/swarm_tuning.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/swarm_tuning.cpp.i
+.PHONY : src/swarm_tuning.cpp.i
 
-src/telemetry_encoder.s: src/telemetry_encoder.cpp.s
-.PHONY : src/telemetry_encoder.s
+src/swarm_tuning.s: src/swarm_tuning.cpp.s
+.PHONY : src/swarm_tuning.s
 
 # target to generate assembly for a file
-src/telemetry_encoder.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/telemetry_encoder.cpp.s
-.PHONY : src/telemetry_encoder.cpp.s
+src/swarm_tuning.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sim.dir/build.make CMakeFiles/sim.dir/src/swarm_tuning.cpp.s
+.PHONY : src/swarm_tuning.cpp.s
 
 src/telemetry_server.o: src/telemetry_server.cpp.o
 .PHONY : src/telemetry_server.o
@@ -340,15 +364,18 @@ help:
 	@echo "... src/pathfinder.o"
 	@echo "... src/pathfinder.i"
 	@echo "... src/pathfinder.s"
+	@echo "... src/pathfollower.o"
+	@echo "... src/pathfollower.i"
+	@echo "... src/pathfollower.s"
 	@echo "... src/simulator.o"
 	@echo "... src/simulator.i"
 	@echo "... src/simulator.s"
 	@echo "... src/swarm_coordinator.o"
 	@echo "... src/swarm_coordinator.i"
 	@echo "... src/swarm_coordinator.s"
-	@echo "... src/telemetry_encoder.o"
-	@echo "... src/telemetry_encoder.i"
-	@echo "... src/telemetry_encoder.s"
+	@echo "... src/swarm_tuning.o"
+	@echo "... src/swarm_tuning.i"
+	@echo "... src/swarm_tuning.s"
 	@echo "... src/telemetry_server.o"
 	@echo "... src/telemetry_server.i"
 	@echo "... src/telemetry_server.s"
