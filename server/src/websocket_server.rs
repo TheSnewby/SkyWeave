@@ -1,4 +1,4 @@
-use crate::telemetry::{ObstacleType, SwarmSettings, TelemetryShared, UavState};
+use crate::telemetry::{Goal, ObstacleType, SwarmSettings, TelemetryShared, UavState};
 use axum::{
     extract::{
         ws::{Message, WebSocket, WebSocketUpgrade},
@@ -131,8 +131,10 @@ async fn send_swarm_settings_to_sim(settings: &SwarmSettings) {
             "cohesion": settings.cohesion,
             "separation": settings.separation,
             "alignment": settings.alignment,
-            "maxSpeed": settings.max_speed,
+            // C++ sim expects snake_case keys
+            "max_speed": settings.max_speed,
             "target_altitude": settings.target_altitude,
+            "swarm_size": settings.swarm_size,
         }
     });
 
@@ -172,6 +174,8 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
 
         // subscribe to telemetry updates
         let mut rx = shared.tx.subscribe();
+        // subscribe to environment updates
+        let mut env_rx = shared.env_tx.subscribe();
 
         // send a snapshot of all UAVs on connect
         if let Ok(initial) = serde_json::to_string(&shared.swarm.list_uavs().await) {
@@ -181,12 +185,14 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
         // send environmental obstacles on connect (if any)
         {
             let obstacles_guard = shared.obstacles.read().await;
+            let goal_guard = shared.goal.read().await;
 
-            if !obstacles_guard.is_empty() {
+            if !obstacles_guard.is_empty() || goal_guard.is_some() {
                 let env_msg = serde_json::json!({
                     "type": "environment",
                     "payload": {
                         "obstacles": &*obstacles_guard,
+                        "goal": &*goal_guard,
                     }
                 });
 
@@ -207,6 +213,7 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                                     // { "type": "environment", "obstacles": [ ... ] }
                                     if let Ok(raw) = serde_json::from_str::<serde_json::Value>(&text) {
                                         if raw.get("type").and_then(|v| v.as_str()) == Some("environment") {
+                                            let mut updated_obstacles = false;
                                             if let Some(obstacles_val) = raw.get("obstacles") {
                                                 match serde_json::from_value::<Vec<ObstacleType>>(obstacles_val.clone()) {
                                                     Ok(obstacles) => {
@@ -219,6 +226,7 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                                                             "ws_recv: updated environment from bridge with {} obstacles",
                                                             count
                                                         );
+                                                        updated_obstacles = true;
                                                     }
                                                     Err(err) => {
                                                         tracing::warn!(
@@ -228,11 +236,21 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                                                         );
                                                     }
                                                 }
-                                            } else {
-                                                tracing::warn!(
-                                                    "Environment message missing `obstacles` field: {}",
-                                                    text
-                                                );
+                                            }
+                                            if let Some(goal_val) = raw.get("goal") {
+                                                match serde_json::from_value(goal_val.clone()) {
+                                                    Ok(goal) => {
+                                                        let mut guard = shared.goal.write().await;
+                                                        *guard = goal;
+                                                        tracing::info!("ws_recv: updated goal from bridge");
+                                                    }
+                                                    Err(err) => {
+                                                        tracing::warn!("Failed to decode goal from WS: {} (raw: {})", err, text);
+                                                    }
+                                                }
+                                            }
+                                            if !updated_obstacles && !raw.get("goal").is_some() {
+                                                tracing::warn!("Environment message missing obstacles/goal fields: {}", text);
                                             }
 
                                             // We've fully handled this message; skip normal ClientMessage parsing.
@@ -281,9 +299,9 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                                                     "flight_mode" => {
                                                         if let Some(mode) = cmd.get("mode").and_then(|v| v.as_str()) {
                                                             tracing::info!("flight_mode command from UI: {}", mode);
-                                                            // Forward the entire JSON command into the shared swarm model
-                                                            // so the backend/sim can interpret and enforce the mode.
-                                                            shared.swarm.apply_command(cmd.clone()).await;
+                                                            // Forward to sim so it can enable/disable autopilot on the leader.
+                                                            let command = format!("flight_mode {}", mode.to_lowercase());
+                                                            send_control_command_to_sim(&command).await;
                                                         } else {
                                                             tracing::warn!("flight_mode command missing `mode` field: {:?}", cmd);
                                                         }
@@ -395,6 +413,13 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                         Err(err) => {
                             tracing::warn!("WebSocket broadcast recv error: {}", err);
                             break;
+                        }
+                    }
+                }
+                env_msg = env_rx.recv() => {
+                    if let Ok(env) = env_msg {
+                        if let Ok(txt) = serde_json::to_string(&env) {
+                            let _ = sender.send(Message::Text(txt)).await;
                         }
                     }
                 }

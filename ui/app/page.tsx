@@ -22,18 +22,19 @@ import SwarmControls, { SwarmSettings } from "./components/SwarmControls";
 import CommandPanel, { Command } from "./components/CommandPanel";
 
 export default function TelemetryPage() {
-	const { uavs, status, obstacles, send } = useTelemetry();
+	const { uavs, status, obstacles, goal, send } = useTelemetry();
 	const router = useRouter();
 	const [showSplash, setShowSplash] = useState(true);
 	const [showTrails, setShowTrails] = useState(true);
-	const [swarmSize, setSwarmSize] = useState<number>(uavs.length);
 	const [swarmSettings, setSwarmSettings] = useState<SwarmSettings>({
 		cohesion: 1.0,
 		separation: 1.0,
 		alignment: 1.0,
-		maxSpeed: 10,
+		// Max speed is fixed by the sim; UI just shows the value.
+		maxSpeed: 5,
 		targetAltitude: 20,
-		swarmSize: swarmSize,
+		// Default swarm size
+		swarmSize: 9,
 	});
 	const [formationMode, setFormationMode] = useState<string | undefined>(undefined);
 
@@ -224,6 +225,7 @@ export default function TelemetryPage() {
 						cameraTarget={cameraTarget}
 						formationMode={formationMode}
 						obstacles={obstacles}
+						goal={goal}
 					/>
 				</section>
 

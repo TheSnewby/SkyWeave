@@ -6,23 +6,23 @@ struct Cylinder
 {
 	double x, y, z, radius, height;
 
-	Cylinder(double x_,double y_,double z_,
-           double rad_,double h_)
-    : x(x_),y(y_),z(z_),radius(rad_),height(h_) {}
+	Cylinder(double x_, double y_, double z_,
+			 double rad_, double h_)
+		: x(x_), y(y_), z(z_), radius(rad_), height(h_) {}
 };
 struct Box
 {
 	double x, y, z, width, depth, height;
 
-	Box(double x_,double y_,double z_, double wid_, double dep_,double h_)
-    : x(x_),y(y_),z(z_), width(wid_), depth(dep_),height(h_) {}
+	Box(double x_, double y_, double z_, double wid_, double dep_, double h_)
+		: x(x_), y(y_), z(z_), width(wid_), depth(dep_), height(h_) {}
 };
 struct Sphere
 {
 	double x, y, z, radius;
 
-	Sphere(double x_,double y_,double z_, double rad_)
-    : x(x_),y(y_),z(z_),radius(rad_) {}
+	Sphere(double x_, double y_, double z_, double rad_)
+		: x(x_), y(y_), z(z_), radius(rad_) {}
 };
 
 void to_json(json &j, Cylinder const &c)
@@ -221,7 +221,8 @@ void Environment::addCylinder(const std::array<double, 3> &center, double radius
 
 	for (int k = gc[2] - h_cell; k <= gc[2] + h_cell; k++)
 	{
-		if (k <= 0 || k >= nz)
+		// allow k == 0 so the cylinder's base sits on the grid instead of floating
+		if (k < 0 || k >= nz)
 			continue;
 		// world Z-value of this layer's center
 		double wz = origin[2] + (k + 0.5) * resolution;
@@ -370,7 +371,7 @@ void Environment::generate_random_obstacles(int count)
 		if (t == 0)
 		{
 			// cylinder: rests on the grid
-			double center_z = base_z + height / 2.0;
+			double center_z = base_z + height / 2.0; // base at grid level
 			std::array<double, 3> center{cx, cy, center_z};
 			addCylinder(center, radius, height);
 		}
@@ -381,8 +382,10 @@ void Environment::generate_random_obstacles(int count)
 			double x1 = cx + width / 2.0;
 			double y0 = cy - depth / 2.0;
 			double y1 = cy + depth / 2.0;
-			double z0 = base_z;
-			double z1 = base_z + height;
+			double z0 = 0.0;	// start at grid level
+			double z1 = height; // extend upward from ground
+			cx = cx;			// keep center values unchanged for JSON
+			cy = cy;
 
 			addBox(x0, y0, z0, x1, y1, z1);
 		}
@@ -405,6 +408,18 @@ void Environment::generate_random_obstacles(int count)
 			addSphere(center, radius);
 		}
 	}
+}
+
+void Environment::setGoal(const std::array<double, 3> &center, double radius)
+{
+	goal_set = true;
+	goal_data = {center[0], center[1], center[2], radius};
+	msg["goal"] = {
+		{"x", center[0]},
+		{"y", center[1]},
+		{"z", center[2]},
+		{"radius", radius},
+	};
 }
 
 /**

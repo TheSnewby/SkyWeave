@@ -21,13 +21,16 @@ async fn main() {
     // initialize shared telemetry state
     let swarm = SwarmState::new();
     let (tx, _rx) = tokio::sync::broadcast::channel(1024);
+    let (env_tx, _env_rx) = tokio::sync::broadcast::channel(32);
 
     // Obstacles are generated / updated by the simulator via telemetry.
     // Start with an empty list; telemetry::run_udp_listener will keep this in sync.
     let shared = TelemetryShared {
         swarm,
         tx,
+        env_tx,
         obstacles: Arc::new(RwLock::new(Vec::new())),
+        goal: Arc::new(RwLock::new(None)),
     };
 
     // start UDP telemetry listener

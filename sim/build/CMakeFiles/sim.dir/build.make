@@ -114,10 +114,24 @@ CMakeFiles/sim.dir/src/pathfinder.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/sim.dir/src/pathfinder.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/nashthames/SkyWeave-1/sim/src/pathfinder.cpp -o CMakeFiles/sim.dir/src/pathfinder.cpp.s
 
+CMakeFiles/sim.dir/src/pathfollower.cpp.o: CMakeFiles/sim.dir/flags.make
+CMakeFiles/sim.dir/src/pathfollower.cpp.o: /Users/nashthames/SkyWeave-1/sim/src/pathfollower.cpp
+CMakeFiles/sim.dir/src/pathfollower.cpp.o: CMakeFiles/sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/sim.dir/src/pathfollower.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sim.dir/src/pathfollower.cpp.o -MF CMakeFiles/sim.dir/src/pathfollower.cpp.o.d -o CMakeFiles/sim.dir/src/pathfollower.cpp.o -c /Users/nashthames/SkyWeave-1/sim/src/pathfollower.cpp
+
+CMakeFiles/sim.dir/src/pathfollower.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/sim.dir/src/pathfollower.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/nashthames/SkyWeave-1/sim/src/pathfollower.cpp > CMakeFiles/sim.dir/src/pathfollower.cpp.i
+
+CMakeFiles/sim.dir/src/pathfollower.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/sim.dir/src/pathfollower.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/nashthames/SkyWeave-1/sim/src/pathfollower.cpp -o CMakeFiles/sim.dir/src/pathfollower.cpp.s
+
 CMakeFiles/sim.dir/src/simulator.cpp.o: CMakeFiles/sim.dir/flags.make
 CMakeFiles/sim.dir/src/simulator.cpp.o: /Users/nashthames/SkyWeave-1/sim/src/simulator.cpp
 CMakeFiles/sim.dir/src/simulator.cpp.o: CMakeFiles/sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/sim.dir/src/simulator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/sim.dir/src/simulator.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sim.dir/src/simulator.cpp.o -MF CMakeFiles/sim.dir/src/simulator.cpp.o.d -o CMakeFiles/sim.dir/src/simulator.cpp.o -c /Users/nashthames/SkyWeave-1/sim/src/simulator.cpp
 
 CMakeFiles/sim.dir/src/simulator.cpp.i: cmake_force
@@ -131,7 +145,7 @@ CMakeFiles/sim.dir/src/simulator.cpp.s: cmake_force
 CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o: CMakeFiles/sim.dir/flags.make
 CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o: /Users/nashthames/SkyWeave-1/sim/src/swarm_coordinator.cpp
 CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o: CMakeFiles/sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o -MF CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o.d -o CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o -c /Users/nashthames/SkyWeave-1/sim/src/swarm_coordinator.cpp
 
 CMakeFiles/sim.dir/src/swarm_coordinator.cpp.i: cmake_force
@@ -142,24 +156,24 @@ CMakeFiles/sim.dir/src/swarm_coordinator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/sim.dir/src/swarm_coordinator.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/nashthames/SkyWeave-1/sim/src/swarm_coordinator.cpp -o CMakeFiles/sim.dir/src/swarm_coordinator.cpp.s
 
-CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o: CMakeFiles/sim.dir/flags.make
-CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o: /Users/nashthames/SkyWeave-1/sim/src/telemetry_encoder.cpp
-CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o: CMakeFiles/sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o -MF CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o.d -o CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o -c /Users/nashthames/SkyWeave-1/sim/src/telemetry_encoder.cpp
+CMakeFiles/sim.dir/src/swarm_tuning.cpp.o: CMakeFiles/sim.dir/flags.make
+CMakeFiles/sim.dir/src/swarm_tuning.cpp.o: /Users/nashthames/SkyWeave-1/sim/src/swarm_tuning.cpp
+CMakeFiles/sim.dir/src/swarm_tuning.cpp.o: CMakeFiles/sim.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/sim.dir/src/swarm_tuning.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sim.dir/src/swarm_tuning.cpp.o -MF CMakeFiles/sim.dir/src/swarm_tuning.cpp.o.d -o CMakeFiles/sim.dir/src/swarm_tuning.cpp.o -c /Users/nashthames/SkyWeave-1/sim/src/swarm_tuning.cpp
 
-CMakeFiles/sim.dir/src/telemetry_encoder.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/sim.dir/src/telemetry_encoder.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/nashthames/SkyWeave-1/sim/src/telemetry_encoder.cpp > CMakeFiles/sim.dir/src/telemetry_encoder.cpp.i
+CMakeFiles/sim.dir/src/swarm_tuning.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/sim.dir/src/swarm_tuning.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/nashthames/SkyWeave-1/sim/src/swarm_tuning.cpp > CMakeFiles/sim.dir/src/swarm_tuning.cpp.i
 
-CMakeFiles/sim.dir/src/telemetry_encoder.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/sim.dir/src/telemetry_encoder.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/nashthames/SkyWeave-1/sim/src/telemetry_encoder.cpp -o CMakeFiles/sim.dir/src/telemetry_encoder.cpp.s
+CMakeFiles/sim.dir/src/swarm_tuning.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/sim.dir/src/swarm_tuning.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/nashthames/SkyWeave-1/sim/src/swarm_tuning.cpp -o CMakeFiles/sim.dir/src/swarm_tuning.cpp.s
 
 CMakeFiles/sim.dir/src/telemetry_server.cpp.o: CMakeFiles/sim.dir/flags.make
 CMakeFiles/sim.dir/src/telemetry_server.cpp.o: /Users/nashthames/SkyWeave-1/sim/src/telemetry_server.cpp
 CMakeFiles/sim.dir/src/telemetry_server.cpp.o: CMakeFiles/sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/sim.dir/src/telemetry_server.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/sim.dir/src/telemetry_server.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sim.dir/src/telemetry_server.cpp.o -MF CMakeFiles/sim.dir/src/telemetry_server.cpp.o.d -o CMakeFiles/sim.dir/src/telemetry_server.cpp.o -c /Users/nashthames/SkyWeave-1/sim/src/telemetry_server.cpp
 
 CMakeFiles/sim.dir/src/telemetry_server.cpp.i: cmake_force
@@ -173,7 +187,7 @@ CMakeFiles/sim.dir/src/telemetry_server.cpp.s: cmake_force
 CMakeFiles/sim.dir/src/uav.cpp.o: CMakeFiles/sim.dir/flags.make
 CMakeFiles/sim.dir/src/uav.cpp.o: /Users/nashthames/SkyWeave-1/sim/src/uav.cpp
 CMakeFiles/sim.dir/src/uav.cpp.o: CMakeFiles/sim.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/sim.dir/src/uav.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/sim.dir/src/uav.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/sim.dir/src/uav.cpp.o -MF CMakeFiles/sim.dir/src/uav.cpp.o.d -o CMakeFiles/sim.dir/src/uav.cpp.o -c /Users/nashthames/SkyWeave-1/sim/src/uav.cpp
 
 CMakeFiles/sim.dir/src/uav.cpp.i: cmake_force
@@ -189,9 +203,10 @@ sim_OBJECTS = \
 "CMakeFiles/sim.dir/src/environment.cpp.o" \
 "CMakeFiles/sim.dir/src/main.cpp.o" \
 "CMakeFiles/sim.dir/src/pathfinder.cpp.o" \
+"CMakeFiles/sim.dir/src/pathfollower.cpp.o" \
 "CMakeFiles/sim.dir/src/simulator.cpp.o" \
 "CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o" \
-"CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o" \
+"CMakeFiles/sim.dir/src/swarm_tuning.cpp.o" \
 "CMakeFiles/sim.dir/src/telemetry_server.cpp.o" \
 "CMakeFiles/sim.dir/src/uav.cpp.o"
 
@@ -201,14 +216,15 @@ sim_EXTERNAL_OBJECTS =
 sim: CMakeFiles/sim.dir/src/environment.cpp.o
 sim: CMakeFiles/sim.dir/src/main.cpp.o
 sim: CMakeFiles/sim.dir/src/pathfinder.cpp.o
+sim: CMakeFiles/sim.dir/src/pathfollower.cpp.o
 sim: CMakeFiles/sim.dir/src/simulator.cpp.o
 sim: CMakeFiles/sim.dir/src/swarm_coordinator.cpp.o
-sim: CMakeFiles/sim.dir/src/telemetry_encoder.cpp.o
+sim: CMakeFiles/sim.dir/src/swarm_tuning.cpp.o
 sim: CMakeFiles/sim.dir/src/telemetry_server.cpp.o
 sim: CMakeFiles/sim.dir/src/uav.cpp.o
 sim: CMakeFiles/sim.dir/build.make
 sim: CMakeFiles/sim.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable sim"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/nashthames/SkyWeave-1/sim/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable sim"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/sim.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
