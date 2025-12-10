@@ -63,7 +63,7 @@ export default function UavScene({
 	goal = null,
 }: Props) {
 	const scale = 1.0; // shrinks world into view
-	const obstacleVisualScale = 3.0; // make obstacles chonkier
+	const obstacleVisualScale = 1.0; // keep visuals aligned with collision grid
 
 	const trailsRef = useRef<Map<number, [number, number, number][]>>(new Map());
 
@@ -198,9 +198,8 @@ export default function UavScene({
 					{obstacles.map((obs, idx) => {
 						// base altitude from sim (z), then lift by half-height / radius
 						if (obs.type === "cylinder") {
-							const baseAltitude = obs.z * scale;
+							const centerY = obs.z * scale;
 							const visualHeight = obs.height * scale * obstacleVisualScale;
-							const centerY = baseAltitude + visualHeight / 2; // base on grid
 
 							return (
 								<group
@@ -230,9 +229,8 @@ export default function UavScene({
 						}
 
 						if (obs.type === "box") {
-							const baseAltitude = obs.z * scale;
+							const centerY = obs.z * scale;
 							const visualHeight = obs.height * scale * obstacleVisualScale;
-							const centerY = baseAltitude + visualHeight / 2;
 
 							return (
 								<group
@@ -261,9 +259,8 @@ export default function UavScene({
 						}
 
 						if (obs.type === "sphere") {
-							const baseAltitude = obs.z * scale;
+							const centerY = obs.z * scale;
 							const visualRadius = obs.radius * scale * obstacleVisualScale;
-							const centerY = baseAltitude + visualRadius; // rest on grid
 
 							return (
 								<group
