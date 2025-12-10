@@ -21,9 +21,9 @@ constexpr int RUST_UDP_PORT = 6000;
 class UAVTelemetryServer;
 class UAV;
 
-#define BORDER_X 500
-#define BORDER_Y 500
-#define BORDER_Z 500
+#define BORDER_X 750
+#define BORDER_Y 750
+#define BORDER_Z 750
 #define RESOLUTION 5
 
 class UAVSimulator

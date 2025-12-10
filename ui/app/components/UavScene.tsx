@@ -66,6 +66,8 @@ export default function UavScene({
 	const obstacleVisualScale = 3.0; // make obstacles chonkier
 
 	const trailsRef = useRef<Map<number, [number, number, number][]>>(new Map());
+	const goalCoreRef = useRef<THREE.Mesh>(null);
+	const goalHaloRef = useRef<THREE.Mesh>(null);
 
 	// leader is ID 0, or first UAV if no explicit leader
 	const leader = uavs.find((u) => u.id === 0) ?? uavs[0];
@@ -78,6 +80,19 @@ export default function UavScene({
 	const originX = worldLeaderX * scale;
 	const originZ = worldLeaderY * scale;
 
+	// pulse the goal marker so it's easy to spot
+	useFrame(({ clock }) => {
+		const t = clock.getElapsedTime();
+		const pulse = 1 + 0.08 * Math.sin(t * 2.0);
+		if (goalCoreRef.current) {
+			goalCoreRef.current.scale.setScalar(pulse);
+		}
+		if (goalHaloRef.current) {
+			const haloScale = 1.2 + 0.25 * Math.sin(t * 1.5);
+			goalHaloRef.current.scale.setScalar(haloScale);
+		}
+	});
+
 	// get some leader stats for HUD
 	const headingDeg = leader
 		? (Math.atan2(leader.velocity.vy, leader.velocity.vx) * 180) / Math.PI + 90
@@ -86,6 +101,14 @@ export default function UavScene({
 	const altitude = leader ? leader.position.z : null;
 
 	const formation = formationMode ? formationMode.toUpperCase() : "N/A";
+	const goalDistance =
+		goal && leader
+			? Math.sqrt(
+				(goal.x - leader.position.x) ** 2 +
+				(goal.y - leader.position.y) ** 2 +
+				(goal.z - leader.position.z) ** 2
+			)
+			: null;
 
 	// leader position in the centered frame (used for camera targeting)
 	const leaderTarget: [number, number, number] | null = leader
@@ -102,6 +125,12 @@ export default function UavScene({
 			<div className="absolute bottom-2 left-3 z-20 nasa-text text-[0.65rem] text-emerald-300 bg-black/60 px-2 py-1 rounded">
 				Obstacle Count: {obstacles.length}
 			</div>
+			{goal && (
+				<div className="absolute bottom-2 right-3 z-20 nasa-text text-[0.65rem] text-emerald-300 bg-black/60 px-2 py-1 rounded text-right space-y-[2px]">
+					<div>Goal: {goal.x.toFixed(1)}, {goal.y.toFixed(1)}, {goal.z.toFixed(1)}</div>
+					{goalDistance !== null && <div>Dist: {goalDistance.toFixed(1)} m</div>}
+				</div>
+			)}
 			{!leader && (
 				<div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
 					<div className="mc-panel-inner nasa-text text-xs tracking-widest text-emerald-300 bg-black/60 px-4 py-2 rounded">
@@ -167,7 +196,7 @@ export default function UavScene({
 
 				{/* ground grid, axes, origin, and obstacles centered on leader-relative origin */}
 				<group position={[-originX, 0, -originZ]}>
-					<gridHelper args={[500, 500, "#00ff00", "#008800"]} />
+					<gridHelper args={[750, 750, "#00ff00", "#008800"]} />
 					<axesHelper args={[5]} />
 
 					{/* scene origin marker */}
@@ -185,22 +214,33 @@ export default function UavScene({
 								goal.y * scale,
 							]}
 						>
-							<mesh>
-								<sphereGeometry args={[goal.radius * scale, 28, 28]} />
+							<mesh ref={goalCoreRef}>
+								<sphereGeometry args={[goal.radius * scale, 32, 32]} />
 								<meshStandardMaterial
-									color="#00ff00"
-									emissive="#22ff88"
-									emissiveIntensity={2.2}
+									color="#00ff66"
+									emissive="#00ff88"
+									emissiveIntensity={3.5}
 								/>
 							</mesh>
-							<mesh>
-								<sphereGeometry args={[goal.radius * 1.4 * scale, 28, 28]} />
+							<mesh ref={goalHaloRef}>
+								<sphereGeometry args={[goal.radius * 1.6 * scale, 32, 32]} />
 								<meshStandardMaterial
-									color="#00ff00"
+									color="#00ff66"
 									transparent
-									opacity={0.2}
-									emissive="#00ff00"
-									emissiveIntensity={1.5}
+									opacity={0.16}
+									emissive="#00ff66"
+									emissiveIntensity={2.5}
+								/>
+							</mesh>
+							<mesh rotation={[-Math.PI / 2, 0, 0]}>
+								<ringGeometry args={[goal.radius * 1.1 * scale, goal.radius * 1.4 * scale, 48]} />
+								<meshStandardMaterial
+									color="#00ff66"
+									emissive="#00ff88"
+									emissiveIntensity={2.2}
+									side={THREE.DoubleSide}
+									transparent
+									opacity={0.35}
 								/>
 							</mesh>
 						</group>
