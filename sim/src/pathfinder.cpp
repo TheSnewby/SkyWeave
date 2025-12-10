@@ -107,6 +107,38 @@ std::vector<int> Pathfinder::rawAStar(
 	int start = toIdx(gs[0], gs[1], gs[2]);			// flattened index of start in env
 	int goal = toIdx(gg[0], gg[1], gg[2]);			// flattened index of goal  in env
 
+	// Guard against invalid or blocked start/goal cells. If either is blocked, carve a small free bubble.
+	auto ensure_free = [this](int i, int j, int k)
+	{
+		if (!env.inBounds(i, j, k))
+			return false;
+		// clear the cell and its immediate neighbors to avoid trapping the search
+		for (int dk = -1; dk <= 1; ++dk)
+			for (int dj = -1; dj <= 1; ++dj)
+				for (int di = -1; di <= 1; ++di)
+				{
+					int ni = i + di, nj = j + dj, nk = k + dk;
+					if (env.inBounds(ni, nj, nk))
+						env.setBlock(ni, nj, nk, false);
+				}
+		return true;
+	};
+
+	if (!env.inBounds(gs[0], gs[1], gs[2]) || !env.inBounds(gg[0], gg[1], gg[2]))
+	{
+		std::cout << "A* failed: start or goal outside environment bounds." << std::endl;
+		return {};
+	}
+
+	if (env.isBlocked(gs[0], gs[1], gs[2]))
+	{
+		ensure_free(gs[0], gs[1], gs[2]);
+	}
+	if (env.isBlocked(gg[0], gg[1], gg[2]))
+	{
+		ensure_free(gg[0], gg[1], gg[2]);
+	}
+
 	// DEBUG SECTION
 	// std::cout << "Grid bounds check - start in bounds: " << env.inBounds(gs[0], gs[1], gs[2]) << std::endl;
 	// std::cout << "Grid bounds check - goal in bounds: " << env.inBounds(gg[0], gg[1], gg[2]) << std::endl;
