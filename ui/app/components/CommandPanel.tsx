@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import type { ConnectionStatus } from "../hooks/useTelemetry";
+import type { ConnectionStatus, FlightMode } from "../hooks/useTelemetry";
 
 export type Command =
 	| { type: "move_leader"; direction: "accelerate" | "decelerate" | "left" | "right" }
@@ -13,6 +13,7 @@ export type Command =
 type CommandPanelProps = {
 	onCommand: (cmd: Command) => void;
 	status: ConnectionStatus;
+	flightMode: FlightMode;
 };
 
 /**
@@ -24,11 +25,10 @@ type CommandPanelProps = {
  * - formation switches
  * - global pause/resume/RTB
  */
-export default function CommandPanel({ onCommand, status }: CommandPanelProps) {
+export default function CommandPanel({ onCommand, status, flightMode }: CommandPanelProps) {
 	const isDisabled = status !== "open";
 
 	const [keyPress, setKeyPress] = useState<string | null>(null);
-	const [autonomous, setAutonomous] = useState<boolean>(false);
 
 	// Keyboard bindings for visual feedback only (commands are handled in page.tsx)
 	useEffect(() => {
@@ -77,9 +77,8 @@ export default function CommandPanel({ onCommand, status }: CommandPanelProps) {
 	}, [isDisabled]);
 
 	const handleToggleFlightMode = () => {
-		const next = !autonomous;
-		setAutonomous(next);
-		onCommand({ type: "flight_mode", mode: next ? "autonomous" : "controlled" });
+		const next = flightMode === "autonomous" ? "controlled" : "autonomous";
+		onCommand({ type: "flight_mode", mode: next });
 	};
 
 	return (
@@ -219,7 +218,7 @@ export default function CommandPanel({ onCommand, status }: CommandPanelProps) {
 					disabled={isDisabled}
 					onClick={handleToggleFlightMode}
 				>
-					{autonomous ? "AUTONOMOUS" : "CONTROLLED"}
+					{flightMode.toUpperCase()}
 				</button>
 				<button
 					className="mc-button btn-glow nasa-text font-semibold tracking-widest text-[0.85rem] px-3 py-2 bg-emerald-900/50 hover:bg-emerald-500/30 border border-emerald-300/70 text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.9)] drop-shadow-[0_0_6px_rgba(16,185,129,0.9)] disabled:opacity-40 disabled:cursor-not-allowed active:translate-y-[2px] active:brightness-90 transition-all"

@@ -25,6 +25,7 @@ export type UavState = {
 };
 
 export type ConnectionStatus = "connecting" | "open" | "closed" | "error";
+export type FlightMode = "autonomous" | "controlled";
 
 export type ObstacleType =
 	| {
@@ -77,6 +78,7 @@ type TelemetryState = {
 	uavs: UavState[];
 	status: ConnectionStatus;
 	settings: any | null;
+	flightMode: FlightMode;
 	obstacles: ObstacleType[];
 	goal: GoalMarker | null;
 	send: (message: unknown) => void;
@@ -120,6 +122,17 @@ const isEnvironmentUpdate = (
 	);
 };
 
+const isFlightModeUpdate = (data: any): data is { type: "flight_mode"; payload: { mode: FlightMode } } => {
+	return (
+		data &&
+		typeof data === "object" &&
+		data.type === "flight_mode" &&
+		data.payload &&
+		typeof data.payload.mode === "string" &&
+		(data.payload.mode === "autonomous" || data.payload.mode === "controlled")
+	);
+};
+
 /**
  * useTelemetry
  * - opens a WebSocket to the rust server
@@ -133,6 +146,7 @@ export function useTelemetry(): TelemetryState {
 	const [uavs, setUavs] = useState<UavState[]>([]);
 	const [status, setStatus] = useState<ConnectionStatus>("connecting");
 	const [settings, setSettings] = useState<any | null>(null);
+	const [flightMode, setFlightMode] = useState<FlightMode>("autonomous");
 	const [obstacles, setObstacles] = useState<ObstacleType[]>([]);
 	const [goal, setGoal] = useState<GoalMarker | null>(null);
 	const wsRef = useRef<WebSocket | null>(null);
@@ -158,6 +172,12 @@ export function useTelemetry(): TelemetryState {
 
 	const sendUiCommand = useCallback(
 		(cmd: UiCommand) => {
+			if ((cmd as any).type === "flight_mode") {
+				const mode = (cmd as any).mode;
+				if (mode === "autonomous" || mode === "controlled") {
+					setFlightMode(mode);
+				}
+			}
 			send(cmd);
 		},
 		[send]
@@ -209,6 +229,12 @@ export function useTelemetry(): TelemetryState {
 				if (isEnvironmentUpdate(data)) {
 					setObstacles(data.payload.obstacles ?? []);
 					setGoal(data.payload.goal ?? null);
+					return;
+				}
+
+				// flight mode broadcast
+				if (isFlightModeUpdate(data)) {
+					setFlightMode(data.payload.mode);
 					return;
 				}
 
@@ -282,5 +308,5 @@ export function useTelemetry(): TelemetryState {
 		);
 	}, [uavs]);
 
-	return { uavs, status, settings, obstacles, goal, send, sendUiCommand };
+	return { uavs, status, settings, flightMode, obstacles, goal, send, sendUiCommand };
 }

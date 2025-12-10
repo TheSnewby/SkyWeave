@@ -14,6 +14,7 @@ use serde::Deserialize;
 use std::env;
 use tokio::net::UdpSocket;
 use tracing::Instrument;
+use serde_json::json;
 
 fn sim_addr() -> String {
     env::var("SKYWEAVE_SIM_ADDR").unwrap_or_else(|_| "127.0.0.1:6001".to_string())
@@ -300,8 +301,21 @@ async fn handle_ws(socket: WebSocket, shared: TelemetryShared) {
                                                         if let Some(mode) = cmd.get("mode").and_then(|v| v.as_str()) {
                                                             tracing::info!("flight_mode command from UI: {}", mode);
                                                             // Forward to sim so it can enable/disable autopilot on the leader.
-                                                            let command = format!("flight_mode {}", mode.to_lowercase());
+                                                            let mode_lower = mode.to_lowercase();
+                                                            let command = format!("flight_mode {}", mode_lower);
                                                             send_control_command_to_sim(&command).await;
+
+                                                            // Broadcast current mode to all WS clients so UI can display sim state
+                                                            let status_msg = json!({
+                                                                "type": "flight_mode",
+                                                                "payload": { "mode": mode_lower }
+                                                            });
+                                                            // send to all clients
+                                                            let _ = shared.env_tx.send(status_msg.clone());
+                                                            // echo to this client
+                                                            if let Ok(txt) = serde_json::to_string(&status_msg) {
+                                                                let _ = sender.send(Message::Text(txt)).await;
+                                                            }
                                                         } else {
                                                             tracing::warn!("flight_mode command missing `mode` field: {:?}", cmd);
                                                         }
