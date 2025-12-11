@@ -220,7 +220,8 @@ export default function UavScene({
 											emissive="#00ff00"
 											emissiveIntensity={1.5}
 											transparent
-											opacity={0.9}
+											opacity={0.6}
+											wireframe
 										/>
 									</mesh>
 								</group>
@@ -249,7 +250,8 @@ export default function UavScene({
 											emissive="#00ff00"
 											emissiveIntensity={1.5}
 											transparent
-											opacity={0.9}
+											opacity={0.6}
+											wireframe
 										/>
 									</mesh>
 								</group>
@@ -272,7 +274,8 @@ export default function UavScene({
 											emissive="#00ff00"
 											emissiveIntensity={1.5}
 											transparent
-											opacity={0.9}
+											opacity={0.6}
+											wireframe
 										/>
 									</mesh>
 								</group>
