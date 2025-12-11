@@ -21,7 +21,7 @@ void UAVSimulator::RTB()
 	// change speed if at zero
 	auto vel = swarm[0].get_vel();
 	if (sqrt(vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]) < 1e-2)
-		swarm[0].set_velocity(-1,-1,-1);  // (better if set to direct course)
+		swarm[0].set_velocity(1,1,1);  // (better if set to direct course)
 }
 
 /**
@@ -153,8 +153,8 @@ void UAVSimulator::start_sim()
 	if (running)
 		return;
 
-	std::cout << "UINTMAX = " << UINT_MAX << std::endl;
-	std::cout << "INTMAX = " << INT_MAX << std::endl;
+	std::cout<< "UINTMAX = " << UINT_MAX <<std::endl;
+	std::cout<< "INTMAX = " << INT_MAX <<std::endl;
 
 	running = true;
 
@@ -414,13 +414,10 @@ void UAVSimulator::command_listener_loop()
 				continue;
 
 			// make leader's ID 0 instead of assuming UAV at index 0 is leader
-			auto find_leader_idx = [&]()
-			{
+			auto find_leader_idx = [&]() {
 				size_t leader_idx = 0;
-				for (size_t i = 0; i < swarm.size(); i++)
-				{
-					if (swarm[i].get_id() == 0)
-					{
+				for (size_t i = 0; i < swarm.size(); i++) {
+					if (swarm[i].get_id() == 0) {
 						leader_idx = i;
 						break;
 					}
@@ -510,13 +507,10 @@ void UAVSimulator::command_listener_loop()
 			if (swarm.empty())
 				continue;
 
-			auto find_leader_idx = [&]()
-			{
+			auto find_leader_idx = [&]() {
 				size_t leader_idx = 0;
-				for (size_t i = 0; i < swarm.size(); i++)
-				{
-					if (swarm[i].get_id() == 0)
-					{
+				for (size_t i = 0; i < swarm.size(); i++) {
+					if (swarm[i].get_id() == 0) {
 						leader_idx = i;
 						break;
 					}
@@ -530,13 +524,11 @@ void UAVSimulator::command_listener_loop()
 			std::array<double, 3> start = swarm[leader_idx].get_pos();
 			std::array<double, 3> base = {0.0, 0.0, 20.0};
 			auto path = pathfinder.plan(start, base);
-			if (path.empty())
-			{
+			if (path.empty()) {
 				path.push_back(start);
 				path.push_back(base);
 			}
-			if (!pathfollower)
-			{
+			if (!pathfollower) {
 				pathfollower = std::make_unique<Pathfollower>(swarm[leader_idx], env.getResolution());
 			}
 			pathfollower->setPath(path);
@@ -552,7 +544,35 @@ void UAVSimulator::command_listener_loop()
 			ss >> tag >> mode;
 
 			if (mode == "autonomous")
+			{
 				leader_autopilot.store(true);
+				// replan a path to the current goal when switching to autonomous
+				if (!swarm.empty())
+				{
+					auto find_leader_idx = [&]() {
+						size_t leader_idx = 0;
+						for (size_t i = 0; i < swarm.size(); i++) {
+							if (swarm[i].get_id() == 0) {
+								leader_idx = i;
+								break;
+							}
+						}
+						return leader_idx;
+					};
+					size_t leader_idx = find_leader_idx();
+					std::array<double, 3> start = swarm[leader_idx].get_pos();
+					auto path = pathfinder.plan(start, goalXYZ);
+					if (path.empty()) {
+						path.push_back(start);
+						path.push_back(goalXYZ);
+					}
+					if (!pathfollower) {
+						pathfollower = std::make_unique<Pathfollower>(swarm[leader_idx], env.getResolution());
+					}
+					pathfollower->setPath(path);
+					reached_goal = false;
+				}
+			}
 			else if (mode == "controlled")
 				leader_autopilot.store(false);
 		}
