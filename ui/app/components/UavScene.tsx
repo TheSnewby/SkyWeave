@@ -63,7 +63,7 @@ export default function UavScene({
 	goal = null,
 }: Props) {
 	const scale = 1.0; // shrinks world into view
-	const obstacleVisualScale = 1.0; // align visuals with collision footprint
+	const obstacleVisualScale = 1.5; // match enlarged collision footprint (1.5x)
 
 	const trailsRef = useRef<Map<number, [number, number, number][]>>(new Map());
 
@@ -218,6 +218,23 @@ export default function UavScene({
 										<meshStandardMaterial
 											color="#00ff00"
 											emissive="#00ff00"
+											emissiveIntensity={0.8}
+											transparent
+											opacity={0.18}
+										/>
+									</mesh>
+									<mesh>
+										<cylinderGeometry
+											args={[
+												obs.radius * scale * obstacleVisualScale,
+												obs.radius * scale * obstacleVisualScale,
+												visualHeight,
+												24,
+											]}
+										/>
+										<meshStandardMaterial
+											color="#00ff00"
+											emissive="#00ff00"
 											emissiveIntensity={1.5}
 											transparent
 											opacity={0.6}
@@ -248,6 +265,22 @@ export default function UavScene({
 										<meshStandardMaterial
 											color="#00ff00"
 											emissive="#00ff00"
+											emissiveIntensity={0.8}
+											transparent
+											opacity={0.18}
+										/>
+									</mesh>
+									<mesh>
+										<boxGeometry
+											args={[
+												obs.width * scale * obstacleVisualScale,
+												visualHeight,
+												obs.depth * scale * obstacleVisualScale,
+											]}
+										/>
+										<meshStandardMaterial
+											color="#00ff00"
+											emissive="#00ff00"
 											emissiveIntensity={1.5}
 											transparent
 											opacity={0.6}
@@ -267,6 +300,16 @@ export default function UavScene({
 									key={`obs-${idx}`}
 									position={[obs.x * scale, centerY, obs.y * scale]}
 								>
+									<mesh>
+										<sphereGeometry args={[visualRadius, 24, 24]} />
+										<meshStandardMaterial
+											color="#00ff00"
+											emissive="#00ff00"
+											emissiveIntensity={0.8}
+											transparent
+											opacity={0.18}
+										/>
+									</mesh>
 									<mesh>
 										<sphereGeometry args={[visualRadius, 24, 24]} />
 										<meshStandardMaterial
@@ -427,26 +470,26 @@ function GoalBeacon({ goal, scale }: { goal: GoalMarker; scale: number }) {
 			<mesh ref={coreRef}>
 				<sphereGeometry args={[goal.radius * scale, 32, 32]} />
 				<meshStandardMaterial
-					color="#ffea00" // brighter yellow/gold
-					emissive="#ffea00"
+					color="#ffdd33" // mustard yellow
+					emissive="#ffdd33"
 					emissiveIntensity={7.2}
 				/>
 			</mesh>
 			<mesh ref={haloRef}>
 				<sphereGeometry args={[goal.radius * 1.6 * scale, 32, 32]} />
 				<meshStandardMaterial
-					color="#ffea00"
+					color="#ffdd33"
 					transparent
 					opacity={0.22}
-					emissive="#ffea00"
+					emissive="#ffdd33"
 					emissiveIntensity={5.4}
 				/>
 			</mesh>
 			<mesh rotation={[-Math.PI / 2, 0, 0]}>
 				<ringGeometry args={[goal.radius * 1.1 * scale, goal.radius * 1.4 * scale, 48]} />
 				<meshStandardMaterial
-					color="#ffea00"
-					emissive="#ffea00"
+					color="#ffdd33"
+					emissive="#ffdd33"
 					emissiveIntensity={5.2}
 					side={THREE.DoubleSide}
 					transparent
