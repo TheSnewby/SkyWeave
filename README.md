@@ -116,7 +116,7 @@ Clone the project:
 
 ```bash
 git clone https://github.com/TheSnewby/SkyWeave.git
-cd Capstone
+cd SkyWeave
 ```
 
 ### Connect Bridge
