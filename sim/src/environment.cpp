@@ -258,7 +258,8 @@ void Environment::addCylinder(const std::array<double, 3> &center, double radius
 }
 
 // helper to round to 2 decimal places to shrink JSON size
-static inline double round2(double v) {
+static inline double round2(double v)
+{
 	return std::round(v * 100.0) / 100.0;
 }
 
@@ -296,7 +297,7 @@ void Environment::generate_random_obstacles(int count)
 	// c[0] = x, c[1] = y, c[2] = effective radius
 	std::vector<std::array<double, 3>> placed_obstacles;
 	const double spacing_buffer = 10.0;		// extra clearance in meters
-	const double spawn_clear_radius = 40.0; // keep spawn zone clear around origin
+	const double spawn_clear_radius = 80.0; // keep spawn zone clear around origin (covers formation spread and scaled obstacles)
 
 	// base altitude for obstacles (the grid's ground level)
 	double base_z = origin[2];
