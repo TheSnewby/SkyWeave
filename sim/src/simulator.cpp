@@ -21,7 +21,7 @@ void UAVSimulator::RTB()
 	// change speed if at zero
 	auto vel = swarm[0].get_vel();
 	if (sqrt(vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]) < 1e-2)
-		swarm[0].set_velocity(1,1,1);  // (better if set to direct course)
+		swarm[0].set_velocity(-1,-1,-1);  // (better if set to direct course)
 }
 
 /**
