@@ -20,8 +20,8 @@ void UAVSimulator::RTB()
 
 	// change speed if at zero
 	auto vel = swarm[0].get_vel();
-	if (sqrt(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]) < 1e-2)
-		swarm[0].set_velocity(1, 1, 1); // (better if set to direct course)
+	if (sqrt(vel[0]*vel[0] + vel[1]*vel[1] + vel[2]*vel[2]) < 1e-2)
+		swarm[0].set_velocity(1,1,1);  // (better if set to direct course)
 }
 
 /**
@@ -110,9 +110,10 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	double corner_offset = RESOLUTION * 0.5; // center of final cell inside bounds
 	double corner_x = (BORDER_X / 2.0) - corner_offset;
 	double corner_y = (BORDER_Y / 2.0) - corner_offset;
-	std::array<double, 3> goalXYZ = {corner_x, corner_y, startXYZ[2] + 50.0};
-	// mark goal for visualization (approx 3x UAV size)
-	env.setGoal(goalXYZ, 6.0);
+	goalXYZ = {corner_x, corner_y, startXYZ[2] + 50.0};
+	goalRadius = 6.0;
+	// mark goal for visualization (approx 3x UAV size) and store radius
+	env.setGoal(goalXYZ, goalRadius);
 	env.environment_to_rust(RUST_UDP_PORT);
 	std::vector<std::array<double, 3>> path = pathfinder.plan(startXYZ, goalXYZ);
 	pathfollower = std::make_unique<Pathfollower>(swarm[0], env.getResolution());
@@ -152,8 +153,8 @@ void UAVSimulator::start_sim()
 	if (running)
 		return;
 
-	std::cout << "UINTMAX = " << UINT_MAX << std::endl;
-	std::cout << "INTMAX = " << INT_MAX << std::endl;
+	std::cout<< "UINTMAX = " << UINT_MAX <<std::endl;
+	std::cout<< "INTMAX = " << INT_MAX <<std::endl;
 
 	running = true;
 
@@ -206,6 +207,39 @@ void UAVSimulator::start_sim()
 				}
 				if (i != 0)
 					swarm[i].apply_boids_forces();
+			}
+
+			// if leader reaches the goal, stop and arrange followers around the beacon
+			if (!reached_goal && !swarm.empty()) {
+				auto leader_pos = swarm[0].get_pos();
+				double dx = leader_pos[0] - goalXYZ[0];
+				double dy = leader_pos[1] - goalXYZ[1];
+				double dz = leader_pos[2] - goalXYZ[2];
+				double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+				if (dist <= goalRadius) {
+					reached_goal = true;
+					leader_autopilot.store(false);
+					swarm[0].set_position(goalXYZ[0], goalXYZ[1], goalXYZ[2]);
+					swarm[0].set_velocity(0.0, 0.0, 0.0);
+
+					int followers = static_cast<int>(swarm.size()) - 1;
+					if (followers > 0) {
+						double ring_radius = goalRadius * 1.4;
+						for (int idx = 0; idx < followers; ++idx) {
+							double t = (idx + 0.5) / followers;
+							double phi = std::acos(1.0 - 2.0 * t);
+							double theta = M_PI * (1.0 + std::sqrt(5.0)) * idx;
+							double x = ring_radius * std::sin(phi) * std::cos(theta);
+							double y = ring_radius * std::sin(phi) * std::sin(theta);
+							double z = ring_radius * std::cos(phi);
+							int uav_idx = idx + 1;
+							if (uav_idx < num_uav) {
+								swarm[uav_idx].set_position(goalXYZ[0] + x, goalXYZ[1] + y, goalXYZ[2] + z);
+								swarm[uav_idx].set_velocity(0.0, 0.0, 0.0);
+							}
+						}
+					}
+				}
 			}
 			std::this_thread::sleep_for(sleep_duration);
 		} })
@@ -380,13 +414,10 @@ void UAVSimulator::command_listener_loop()
 				continue;
 
 			// make leader's ID 0 instead of assuming UAV at index 0 is leader
-			auto find_leader_idx = [&]()
-			{
+			auto find_leader_idx = [&]() {
 				size_t leader_idx = 0;
-				for (size_t i = 0; i < swarm.size(); i++)
-				{
-					if (swarm[i].get_id() == 0)
-					{
+				for (size_t i = 0; i < swarm.size(); i++) {
+					if (swarm[i].get_id() == 0) {
 						leader_idx = i;
 						break;
 					}
@@ -472,13 +503,10 @@ void UAVSimulator::command_listener_loop()
 			if (swarm.empty())
 				continue;
 
-			auto find_leader_idx = [&]()
-			{
+			auto find_leader_idx = [&]() {
 				size_t leader_idx = 0;
-				for (size_t i = 0; i < swarm.size(); i++)
-				{
-					if (swarm[i].get_id() == 0)
-					{
+				for (size_t i = 0; i < swarm.size(); i++) {
+					if (swarm[i].get_id() == 0) {
 						leader_idx = i;
 						break;
 					}
@@ -492,13 +520,11 @@ void UAVSimulator::command_listener_loop()
 			std::array<double, 3> start = swarm[leader_idx].get_pos();
 			std::array<double, 3> base = {0.0, 0.0, 20.0};
 			auto path = pathfinder.plan(start, base);
-			if (path.empty())
-			{
+			if (path.empty()) {
 				path.push_back(start);
 				path.push_back(base);
 			}
-			if (!pathfollower)
-			{
+			if (!pathfollower) {
 				pathfollower = std::make_unique<Pathfollower>(swarm[leader_idx], env.getResolution());
 			}
 			pathfollower->setPath(path);
