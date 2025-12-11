@@ -58,7 +58,7 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 		// leader and followers start co-located; formation offsets will spread them out
 		swarm.push_back(UAV(i, 8000 + i, 0.0, 0.0, 20.0, env));
 		// give everyone an initial forward velocity along +Y
-		swarm[i].set_velocity(0.0, 4.0, 0.0); // cruisin on y axis
+		swarm[i].set_velocity(0.0, 5.0, 0.0); // cruisin on y axis
 	}
 
 	// set initial formation (LINE as default) and compute offsets
@@ -102,7 +102,7 @@ UAVSimulator::UAVSimulator(int num_uavs) : env(BORDER_X / RESOLUTION, BORDER_Y /
 	print_swarm_status();
 
 	// Set Up Environment
-	env.generate_random_obstacles(60);
+	env.generate_random_obstacles(100);
 	// generate_test_obstacles(); 					// for testing
 
 	std::array<double, 3> startXYZ = swarm[0].get_pos();
