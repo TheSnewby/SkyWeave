@@ -24,8 +24,8 @@ The system demonstrates real-time networking, distributed autonomy, and visually
 		- [Build and Run the C++ Simulator](#build-and-run-the-c-simulator)
 	- [Running through Fly.io and the Vercel App](#running-through-flyio-and-the-vercel-app)
 		- [Installation](#installation-1)
-		- [Run the C++ Simulator:](#run-the-c-simulator)
 		- [Connect Bridge](#connect-bridge)
+		- [Run the C++ Simulator:](#run-the-c-simulator)
 		- [Open Vercel App](#open-vercel-app)
 		- [FLY](#fly)
 	- [Project Structure](#project-structure)
@@ -56,7 +56,8 @@ This project was developed and tested on:
 - **Simulation Engine:** C++17 (multithreaded, real-time loop)  
 - **Backend:** Rust (Tokio async, actix-web, WebSocket, UDP)  
 - **Frontend:** Next.js 14 (React + TypeScript)  
-- **3D Engine:** @react-three/fiber (R3F) + Three.js  
+- **3D Engine:** @react-three/fiber (R3F) + Three.js 
+- **Pathfinding** A*  
 - **Deployment:**
   - **Fly.io** (Rust server)
   - **Vercel** (UI)
@@ -101,8 +102,8 @@ cargo run
 cd sim
 mkdir build && cd build
 cmake ..
-make -j4
-./simulator
+make -j8
+./sim
 ```
 
 ---
@@ -114,8 +115,17 @@ make -j4
 Clone the project:
 
 ```bash
-git clone https://github.com/TheSnewby/Capstone.git
+git clone https://github.com/TheSnewby/SkyWeave.git
 cd Capstone
+```
+
+### Connect Bridge
+
+In a separate terminal, run UDP->WebSocket node:
+
+```bash
+cd SkyWeave/udp_ws_bridge
+node udp_ws_bridge.mjs
 ```
 
 ### Run the C++ Simulator:
@@ -124,18 +134,7 @@ Start simulation pointed at fly.io server:
 
 ```bash
 cd sim/build
-export SKYWEAVE_UDP_HOST=127.0.0.1
-export SKYWEAVE_UDP_PORT=6000
 ./sim
-```
-
-### Connect Bridge
-
-In a separate terminal, run UDP->WebSocket node:
-
-```bash
-cd Capstone/udp_ws_bridge
-node udp_ws_bridge.mjs
 ```
 
 ### Open Vercel App
@@ -278,9 +277,7 @@ Handles:
 
 ## Stretch Goals
 
-- Collision detection  
-- Battery simulation + return-to-home logic  
-- Additional formations (V, circle, wedge, spiral)  
+- Collision detection   
 - Click‑to‑place waypoints  
 - Rogue UAV behavior testing  
 - Real drone integration (future)  

@@ -10,7 +10,15 @@ void UAV::update_position(double dt)
 	auto canOccupy = [this](const std::array<double, 3> &p)
 	{
 		auto g = env.toGrid(p);
-		return env.inBounds(g[0], g[1], g[2]) && !env.isBlocked(g[0], g[1], g[2]);
+		if (!env.inBounds(g[0], g[1], g[2]))
+			return false;
+		// check a small inflated neighborhood to avoid grazing edges
+		for (int dk = -1; dk <= 1; ++dk)
+			for (int dj = -1; dj <= 1; ++dj)
+				for (int di = -1; di <= 1; ++di)
+					if (env.isBlocked(g[0] + di, g[1] + dj, g[2] + dk))
+						return false;
+		return true;
 	};
 
 	// X move
@@ -367,8 +375,8 @@ std::array<double, 3> UAV::calculate_obstacle_forces()
 	std::array<double, 3> obstacleForce = {0, 0, 0};
 	std::array<double, 3> worldPos = get_pos();
 
-	int checkRadius = 3;	// 1 - 3
-	double maxForce = 0.75;	// 0.5 - 5
+	int checkRadius = 1;   // 1 - 3
+	double maxForce = 5.0; // might remove if results undesireable
 
 	for (int dk = -checkRadius; dk <= checkRadius; dk++)
 	{
@@ -388,13 +396,13 @@ std::array<double, 3> UAV::calculate_obstacle_forces()
 					// std::cout << "\nOBSTACLE DETECTED at grid (" << ni << "," << nj << "," << nk << ")\n" << std::endl;
 
 					// Convert obstacle cell to world coordinates
-                    std::array<double, 3> obstacleWorldPos = env.toWorld(ni, nj, nk);
+					std::array<double, 3> obstacleWorldPos = env.toWorld(ni, nj, nk);
 
-                    // Calculate world distance
-                    double dx = worldPos[0] - obstacleWorldPos[0];
-                    double dy = worldPos[1] - obstacleWorldPos[1];
-                    double dz = worldPos[2] - obstacleWorldPos[2];
-                    double distance = sqrt(dx*dx + dy*dy + dz*dz);
+					// Calculate world distance
+					double dx = worldPos[0] - obstacleWorldPos[0];
+					double dy = worldPos[1] - obstacleWorldPos[1];
+					double dz = worldPos[2] - obstacleWorldPos[2];
+					double distance = sqrt(dx * dx + dy * dy + dz * dz);
 
 					if (distance > 0)
 					{

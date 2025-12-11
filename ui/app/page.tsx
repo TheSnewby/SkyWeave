@@ -36,7 +36,7 @@ export default function TelemetryPage() {
 		// Default swarm size
 		swarmSize: 9,
 	});
-	const [formationMode, setFormationMode] = useState<string | undefined>(undefined);
+	const [formationMode, setFormationMode] = useState<string | undefined>("vee");
 
 	const leader = uavs.find((u) => u.id === 0);
 	const cameraTarget = leader
