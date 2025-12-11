@@ -427,27 +427,27 @@ function GoalBeacon({ goal, scale }: { goal: GoalMarker; scale: number }) {
 			<mesh ref={coreRef}>
 				<sphereGeometry args={[goal.radius * scale, 32, 32]} />
 				<meshStandardMaterial
-					color="#ffd000" // bright yellow
-					emissive="#ffd000"
-					emissiveIntensity={6.8}
+					color="#ffea00" // brighter yellow/gold
+					emissive="#ffea00"
+					emissiveIntensity={7.2}
 				/>
 			</mesh>
 			<mesh ref={haloRef}>
 				<sphereGeometry args={[goal.radius * 1.6 * scale, 32, 32]} />
 				<meshStandardMaterial
-					color="#ffd000"
+					color="#ffea00"
 					transparent
-					opacity={0.2}
-					emissive="#ffd000"
-					emissiveIntensity={5.0}
+					opacity={0.22}
+					emissive="#ffea00"
+					emissiveIntensity={5.4}
 				/>
 			</mesh>
 			<mesh rotation={[-Math.PI / 2, 0, 0]}>
 				<ringGeometry args={[goal.radius * 1.1 * scale, goal.radius * 1.4 * scale, 48]} />
 				<meshStandardMaterial
-					color="#ffd000"
-					emissive="#ffd000"
-					emissiveIntensity={4.8}
+					color="#ffea00"
+					emissive="#ffea00"
+					emissiveIntensity={5.2}
 					side={THREE.DoubleSide}
 					transparent
 					opacity={0.35}
